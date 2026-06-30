@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import { CONTROLS, CCIS } from "../src/lib/data/catalog";
+import { loadControls, loadCciMap } from "../src/lib/data/catalog";
 import { ingestScan } from "../src/lib/ingest";
 import { generatePoams } from "../src/lib/poam";
 
@@ -32,26 +32,34 @@ async function main() {
     prisma.user.deleteMany(),
   ]);
 
-  // --- Control catalog ---
-  for (const c of CONTROLS) {
-    await prisma.control.create({
-      data: {
-        id: c.id,
-        family: c.family,
-        title: c.title,
-        text: c.text,
-        baselineLow: c.baselines.includes("L"),
-        baselineModerate: c.baselines.includes("M"),
-        baselineHigh: c.baselines.includes("H"),
-      },
-    });
-  }
-  for (const cci of CCIS) {
-    await prisma.cci.create({
-      data: { id: cci.id, definition: cci.definition, controlId: cci.controlId },
-    });
-  }
-  console.log(`  Catalog: ${CONTROLS.length} controls, ${CCIS.length} CCIs`);
+  // --- Control catalog (full NIST 800-53 Rev 5) ---
+  const controls = loadControls();
+  const validControlIds = new Set(controls.map((c) => c.id));
+  await prisma.control.createMany({
+    data: controls.map((c) => ({
+      id: c.id,
+      family: c.family,
+      title: c.title,
+      text: c.text,
+      baselineLow: c.baselines.includes("L"),
+      baselineModerate: c.baselines.includes("M"),
+      baselineHigh: c.baselines.includes("H"),
+    })),
+    skipDuplicates: true,
+  });
+
+  // --- CCIs (full DISA list, mapped to controls where available) ---
+  const cciMap = loadCciMap();
+  const cciRows = Object.entries(cciMap).map(([id, e]) => ({
+    id,
+    definition: e.definition,
+    controlId: e.control && validControlIds.has(e.control) ? e.control : null,
+  }));
+  await prisma.cci.createMany({ data: cciRows, skipDuplicates: true });
+  const mappedCcis = cciRows.filter((c) => c.controlId).length;
+  console.log(
+    `  Catalog: ${controls.length} controls, ${cciRows.length} CCIs (${mappedCcis} mapped)`
+  );
 
   // --- Users ---
   const pw = await bcrypt.hash("Password123!", 10);

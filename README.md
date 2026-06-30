@@ -78,11 +78,22 @@ npm run dev                          # http://localhost:3000
 ## How correlation works
 
 ```
-STIG rule ──(CCI_REF)──▶ CCI ──(catalog map)──▶ 800-53 control ──▶ Finding↔Control link
-ACAS plugin ─────────────────(no CCI: SI-2/RA-5 fallback)────────▶ Finding↔Control link
+STIG rule ──(CCI_REF)──▶ CCI ──(DISA CCI list)──▶ 800-53 control ──▶ Finding↔Control link
+ACAS plugin ─────────────────(no CCI: SI-2/RA-5 fallback)──────────▶ Finding↔Control link
 ```
 
-The control catalog and CCI map live in `src/lib/data/catalog.ts` (a representative subset). A production deployment imports the full 800-53 catalog (OSCAL) and the complete DISA `U_CCI_List.xml`.
+The app ships the **full NIST SP 800-53 Rev 5 catalog** (1,196 controls + enhancements across all 20 families, with Low/Mod/High baseline membership) and the **complete DISA CCI list** (5,098 CCIs, ~96% mapped to a control — at enhancement level where applicable, e.g. `CCI-000196 → IA-5(1)`). Admins can (re)load the bundle in-app from **Controls → Load catalog bundle**.
+
+### Updating the catalog
+
+Bundles in `src/lib/data/*.json` are generated offline from upstream sources by `scripts/build-catalog.ts`:
+
+```bash
+# fetch sources into .catalog-src/ (NIST OSCAL + DISA CCI list), then:
+npm run build:catalog        # regenerates nist-800-53-rev5.json + cci-map-rev5.json
+```
+
+Sources: NIST OSCAL content (`usnistgov/oscal-content`) and the DISA CCI list mirrored in `ComplianceAsCode/content`.
 
 ## Project layout
 
@@ -96,7 +107,9 @@ src/
     parsers/             # nessus / ckl / cklb parsers + normalization
     ingest.ts            # parse -> upsert assets/findings -> correlate -> de-dup
     poam.ts              # POA&M generation from open findings
-    data/catalog.ts      # 800-53 controls + CCI->control map
+    data/                # bundled 800-53 Rev 5 catalog + DISA CCI map (JSON) + loaders
+scripts/
+  build-catalog.ts       # regenerate the bundles from upstream OSCAL + CCI sources
     auth.ts              # JWT session auth
   app/
     (dash)/              # authenticated app: dashboard, systems, findings, poams, controls, mitigations, import
@@ -112,7 +125,7 @@ samples/                 # example ACAS/STIG files
 
 ## Roadmap
 
-- Full OSCAL 800-53 catalog + complete DISA CCI import (admin importer)
+- ✅ Full OSCAL 800-53 Rev 5 catalog + complete DISA CCI import (with in-app admin loader)
 - SCAP / XCCDF results ingestion
 - eMASS-compatible POA&M export (CSV/XLSX) and SSP generation
 - Continuous monitoring (ConMon) trends & scan scheduling
