@@ -25,6 +25,7 @@ export interface IngestResult {
   totalFindings: number;
   openFindings: number;
   newFindings: number;
+  closedFindings: number;
 }
 
 /** Parse + persist a scan file for a system, de-duplicating against history. */
@@ -66,8 +67,15 @@ export async function ingestScan(args: {
   let openFindings = 0;
   let newFindings = 0;
 
+  // ConMon bookkeeping: which assets this scan covered and which findings it
+  // (re)confirmed, so we can auto-close findings that no longer appear.
+  const scanSource = SCAN_SOURCE[parsed.scanType];
+  const coveredAssetIds = new Set<string>();
+  const seenFindingIds = new Set<string>();
+
   for (const asset of parsed.assets) {
     const assetRow = await upsertAsset(systemId, asset);
+    coveredAssetIds.add(assetRow.id);
 
     for (const f of asset.findings) {
       totalFindings++;
@@ -89,7 +97,7 @@ export async function ingestScan(args: {
       });
       if (!existing) newFindings++;
 
-      await prisma.finding.upsert({
+      const upserted = await prisma.finding.upsert({
         where: {
           systemId_ruleId_assetId: {
             systemId,
@@ -124,13 +132,28 @@ export async function ingestScan(args: {
           severity: f.severity,
           status: f.status,
           lastSeen: new Date(),
+          // A finding seen again is no longer closed.
+          closedAt: f.status === "OPEN" ? null : undefined,
+          resolvedByRescan: f.status === "OPEN" ? false : undefined,
           // Refresh source guidance in case the benchmark was updated.
           checkText: f.checkText,
           fixText: f.fixText,
         },
       });
+      seenFindingIds.add(upserted.id);
     }
   }
+
+  // ConMon: auto-close findings of the same source on covered assets that this
+  // scan no longer reports (i.e. remediated), then complete fully-resolved POA&Ms.
+  const closedFindings = await reconcileClosures(
+    systemId,
+    scanSource,
+    [...coveredAssetIds],
+    [...seenFindingIds]
+  );
+  await reconcilePoams(systemId);
+  await snapshotPosture(systemId, scanImport.id);
 
   const result = await prisma.scanImport.update({
     where: { id: scanImport.id },
@@ -143,7 +166,11 @@ export async function ingestScan(args: {
       verb: "imported",
       entity: "ScanImport",
       entityId: scanImport.id,
-      summary: `Imported ${filename} (${parsed.scanType}): ${totalFindings} findings, ${openFindings} open, ${newFindings} new.`,
+      summary:
+        `Imported ${filename} (${parsed.scanType}): ${totalFindings} findings, ` +
+        `${openFindings} open, ${newFindings} new` +
+        (closedFindings ? `, ${closedFindings} auto-closed by rescan` : "") +
+        ".",
     },
   });
 
@@ -155,7 +182,91 @@ export async function ingestScan(args: {
     totalFindings,
     openFindings,
     newFindings,
+    closedFindings,
   };
+}
+
+/** Map a scan type to the normalized finding source it produces. */
+const SCAN_SOURCE: Record<ScanType, "ACAS" | "STIG" | "SCAP"> = {
+  ACAS_NESSUS: "ACAS",
+  STIG_CKL: "STIG",
+  STIG_CKLB: "STIG",
+  SCAP: "SCAP",
+};
+
+/**
+ * Close previously-OPEN findings from the same source on the scanned assets
+ * that the latest scan no longer reports. Returns how many were closed.
+ */
+async function reconcileClosures(
+  systemId: string,
+  source: "ACAS" | "STIG" | "SCAP",
+  coveredAssetIds: string[],
+  seenFindingIds: string[]
+): Promise<number> {
+  if (coveredAssetIds.length === 0) return 0;
+  const res = await prisma.finding.updateMany({
+    where: {
+      systemId,
+      source,
+      status: "OPEN",
+      assetId: { in: coveredAssetIds },
+      id: { notIn: seenFindingIds.length ? seenFindingIds : ["__none__"] },
+    },
+    data: { status: "CLOSED", closedAt: new Date(), resolvedByRescan: true },
+  });
+  return res.count;
+}
+
+/** Complete POA&Ms whose linked findings are all resolved (no longer open). */
+async function reconcilePoams(systemId: string): Promise<void> {
+  const open = await prisma.poam.findMany({
+    where: { systemId, status: { in: ["DRAFT", "OPEN", "ONGOING"] } },
+    select: { id: true, findings: { select: { status: true } } },
+  });
+  const now = new Date();
+  for (const p of open) {
+    if (p.findings.length === 0) continue;
+    const allResolved = p.findings.every((f) => f.status !== "OPEN");
+    if (allResolved) {
+      await prisma.poam.update({
+        where: { id: p.id },
+        data: { status: "COMPLETED", actualCompletion: now },
+      });
+    }
+  }
+}
+
+/** Append a point-in-time posture snapshot for trend/burndown charts. */
+async function snapshotPosture(
+  systemId: string,
+  scanImportId?: string
+): Promise<void> {
+  const bySeverity = await prisma.finding.groupBy({
+    by: ["severity"],
+    where: { systemId, status: "OPEN" },
+    _count: true,
+  });
+  const sev = (s: string) =>
+    bySeverity.find((g) => g.severity === s)?._count ?? 0;
+  const closedTotal = await prisma.finding.count({
+    where: { systemId, status: "CLOSED" },
+  });
+  const totalOpen =
+    sev("CRITICAL") + sev("HIGH") + sev("MEDIUM") + sev("LOW") + sev("INFO");
+
+  await prisma.postureSnapshot.create({
+    data: {
+      systemId,
+      scanImportId,
+      openCritical: sev("CRITICAL"),
+      openHigh: sev("HIGH"),
+      openMedium: sev("MEDIUM"),
+      openLow: sev("LOW"),
+      totalOpen,
+      closedTotal,
+    },
+  });
 }
 
 async function upsertAsset(systemId: string, asset: ParsedAsset) {

@@ -16,6 +16,7 @@ export type ImportState = {
     total: number;
     open: number;
     isNew: number;
+    closed: number;
   }>;
 };
 
@@ -47,6 +48,7 @@ export async function importScansAction(
         total: res.totalFindings,
         open: res.openFindings,
         isNew: res.newFindings,
+        closed: res.closedFindings,
       });
     }
   } catch (e) {

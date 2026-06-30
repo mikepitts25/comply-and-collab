@@ -73,6 +73,7 @@ export function ImportForm({
                 <th className="th">Findings</th>
                 <th className="th">Open</th>
                 <th className="th">New</th>
+                <th className="th">Auto-closed</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-100">
@@ -84,6 +85,7 @@ export function ImportForm({
                   <td className="td">{r.total}</td>
                   <td className="td text-red-600">{r.open}</td>
                   <td className="td">{r.isNew}</td>
+                  <td className="td text-green-600">{r.closed || ""}</td>
                 </tr>
               ))}
             </tbody>
