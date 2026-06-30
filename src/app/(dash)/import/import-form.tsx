@@ -39,8 +39,9 @@ export function ImportForm({
             required
           />
           <p className="mt-1 text-xs text-ink-500">
-            Supports ACAS <code>.nessus</code>, STIG <code>.ckl</code> (XML) and{" "}
-            <code>.cklb</code> (JSON). Multiple files allowed.
+            Supports ACAS <code>.nessus</code>, STIG <code>.ckl</code> (XML) /{" "}
+            <code>.cklb</code> (JSON), and SCAP/XCCDF <code>.xml</code> (SCC,
+            OpenSCAP). Multiple files allowed.
           </p>
         </div>
 

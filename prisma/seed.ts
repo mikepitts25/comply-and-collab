@@ -101,6 +101,7 @@ async function main() {
     { name: "acas-scan.nessus" },
     { name: "rhel8-web01.ckl" },
     { name: "windows-app01.cklb" },
+    { name: "scap-rhel8-web01-xccdf.xml" },
   ];
   for (const f of files) {
     const content = readFileSync(join(SAMPLES, f.name), "utf8");

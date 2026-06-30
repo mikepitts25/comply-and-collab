@@ -19,8 +19,8 @@ export default async function ImportPage() {
       <div>
         <h1 className="text-2xl font-semibold text-ink-900">Import Scans</h1>
         <p className="text-sm text-ink-500">
-          Ingest ACAS and STIG results. Findings are de-duplicated against
-          history and auto-correlated to security controls.
+          Ingest ACAS, STIG, and SCAP/XCCDF results. Findings are de-duplicated
+          against history and auto-correlated to security controls.
         </p>
       </div>
 
