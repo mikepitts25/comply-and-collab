@@ -34,5 +34,9 @@ yarn-error.log*
 # local prisma engine mirror (sandbox-only)
 /.prisma-mirror
 
+# upstream catalog sources (large; bundles in src/lib/data are committed)
+/.catalog-src
+/.next-run.log
+
 # typescript
 *.tsbuildinfo
