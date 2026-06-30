@@ -18,7 +18,7 @@
 
 ## Features (v0.1)
 
-- **Scan ingestion pipeline** — ACAS `.nessus`, STIG `.ckl` (XML) and `.cklb` (JSON). De-duplicated across scans by rule/plugin per asset (first-seen / last-seen tracking).
+- **Scan ingestion pipeline** — ACAS `.nessus`, STIG `.ckl` (XML) / `.cklb` (JSON), and SCAP/XCCDF `.xml` (SCC, OpenSCAP; ARF-aware). De-duplicated across scans by rule/plugin per asset (first-seen / last-seen tracking).
 - **Automatic control correlation** — STIG findings map to 800-53 via their CCIs; ACAS findings fall back to flaw-remediation controls (SI-2 / RA-5).
 - **Unified findings view** — one table across sources with severity (CAT I/II/III ↔ Critical/High/Med/Low), status, asset, mapped controls, assignee, and filters.
 - **POA&M automation** — generate POA&Ms from open findings, grouped by weakness across hosts, with severity-based remediation timelines, milestones, and control linkage.
@@ -74,6 +74,7 @@ npm run dev                          # http://localhost:3000
 - `acas-scan.nessus` — ACAS credentialed scan, 2 hosts
 - `rhel8-web01.ckl` — RHEL 8 STIG checklist (XML)
 - `windows-app01.cklb` — Windows Server 2022 STIG checklist (JSON)
+- `scap-rhel8-web01-xccdf.xml` — SCAP/XCCDF result for the RHEL 8 host
 
 ## How correlation works
 
@@ -126,7 +127,7 @@ samples/                 # example ACAS/STIG files
 ## Roadmap
 
 - ✅ Full OSCAL 800-53 Rev 5 catalog + complete DISA CCI import (with in-app admin loader)
-- SCAP / XCCDF results ingestion
+- ✅ SCAP / XCCDF results ingestion (SCC / OpenSCAP, ARF-aware)
 - eMASS-compatible POA&M export (CSV/XLSX) and SSP generation
 - Continuous monitoring (ConMon) trends & scan scheduling
 - CAC/PIV (client-cert) authentication and full RBAC enforcement

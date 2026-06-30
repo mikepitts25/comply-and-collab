@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xccdf:Benchmark xmlns:xccdf="http://checklists.nist.gov/xccdf/1.2"
+                 id="xccdf_mil.disa.stig_benchmark_RHEL_8_STIG">
+  <xccdf:title>Red Hat Enterprise Linux 8 Security Technical Implementation Guide</xccdf:title>
+  <xccdf:version>1.12</xccdf:version>
+
+  <xccdf:Group id="xccdf_mil.disa.stig_group_V-230235">
+    <xccdf:Rule id="xccdf_mil.disa.stig_rule_SV-230235r627750_rule" severity="medium">
+      <xccdf:title>RHEL 8 must enable the SELinux targeted policy.</xccdf:title>
+      <xccdf:description>Without verification of the security functions, security functions may not operate correctly and the failure may go unnoticed.</xccdf:description>
+      <xccdf:ident system="http://iase.disa.mil/cci">CCI-000366</xccdf:ident>
+      <xccdf:fixtext>Configure RHEL 8 to verify the SELinux targeted policy in /etc/selinux/config.</xccdf:fixtext>
+      <xccdf:check system="http://scap.nist.gov/schema/ocil/2.0">
+        <xccdf:check-content>Verify the SELinux targeted policy: sestatus | grep "Loaded policy"</xccdf:check-content>
+      </xccdf:check>
+    </xccdf:Rule>
+  </xccdf:Group>
+
+  <xccdf:Group id="xccdf_mil.disa.stig_group_V-230244">
+    <xccdf:Rule id="xccdf_mil.disa.stig_rule_SV-230244r917862_rule" severity="high">
+      <xccdf:title>RHEL 8 must ensure the SSH server is configured to use only FIPS-validated key exchange algorithms.</xccdf:title>
+      <xccdf:description>Unapproved mechanisms used for authentication to the cryptographic module are not verified and cannot be relied upon.</xccdf:description>
+      <xccdf:ident system="http://iase.disa.mil/cci">CCI-001453</xccdf:ident>
+      <xccdf:fixtext>Configure the SSH server to use FIPS-validated key exchange algorithms in /etc/crypto-policies.</xccdf:fixtext>
+      <xccdf:check system="http://scap.nist.gov/schema/ocil/2.0">
+        <xccdf:check-content>Verify the SSH server KexAlgorithms.</xccdf:check-content>
+      </xccdf:check>
+    </xccdf:Rule>
+  </xccdf:Group>
+
+  <xccdf:Group id="xccdf_mil.disa.stig_group_V-230502">
+    <xccdf:Rule id="xccdf_mil.disa.stig_rule_SV-230502r627750_rule" severity="low">
+      <xccdf:title>RHEL 8 must display the Standard Mandatory DoD Notice and Consent Banner before granting local access.</xccdf:title>
+      <xccdf:description>Display of the DoD consent banner before granting access ensures privacy and security notification.</xccdf:description>
+      <xccdf:ident system="http://iase.disa.mil/cci">CCI-000048</xccdf:ident>
+      <xccdf:fixtext>Populate /etc/issue with the Standard Mandatory DoD Notice and Consent Banner.</xccdf:fixtext>
+    </xccdf:Rule>
+  </xccdf:Group>
+
+  <xccdf:TestResult id="xccdf_mil.disa.stig_testresult_RHEL8"
+                    start-time="2026-06-29T09:00:00" end-time="2026-06-29T09:14:00">
+    <xccdf:benchmark href="U_RHEL_8_STIG.xml"/>
+    <xccdf:target>web01</xccdf:target>
+    <xccdf:target-address>10.10.20.11</xccdf:target-address>
+    <xccdf:rule-result idref="xccdf_mil.disa.stig_rule_SV-230235r627750_rule" severity="medium">
+      <xccdf:result>fail</xccdf:result>
+    </xccdf:rule-result>
+    <xccdf:rule-result idref="xccdf_mil.disa.stig_rule_SV-230244r917862_rule" severity="high">
+      <xccdf:result>fail</xccdf:result>
+    </xccdf:rule-result>
+    <xccdf:rule-result idref="xccdf_mil.disa.stig_rule_SV-230502r627750_rule" severity="low">
+      <xccdf:result>pass</xccdf:result>
+    </xccdf:rule-result>
+  </xccdf:TestResult>
+</xccdf:Benchmark>

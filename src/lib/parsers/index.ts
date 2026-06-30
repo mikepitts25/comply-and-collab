@@ -1,6 +1,7 @@
 import { parseNessus } from "./nessus";
 import { parseCkl } from "./ckl";
 import { parseCklb } from "./cklb";
+import { parseScap } from "./scap";
 import type { ParseResult } from "./types";
 
 export * from "./types";
@@ -26,7 +27,15 @@ export function parseScan(filename: string, content: string): ParseResult {
   ) {
     return parseNessus(content);
   }
+  // SCAP results: XCCDF (SCC / OpenSCAP) or ARF-wrapped. Match with or without
+  // a namespace prefix (e.g. <cdf:TestResult>, <xccdf:Benchmark>).
+  if (
+    /<(\w+:)?(TestResult|asset-report-collection)\b/.test(trimmed) ||
+    /<(\w+:)?Benchmark\b/.test(trimmed)
+  ) {
+    return parseScap(content);
+  }
   throw new Error(
-    `Unrecognized scan format for "${filename}". Supported: .nessus (ACAS), .ckl, .cklb (STIG).`
+    `Unrecognized scan format for "${filename}". Supported: .nessus (ACAS), .ckl/.cklb (STIG), .xml (SCAP/XCCDF).`
   );
 }
