@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireCapability } from "@/lib/rbac-server";
+import { ForbiddenError } from "@/lib/rbac";
 import { ingestScan } from "@/lib/ingest";
 import { generatePoams } from "@/lib/poam";
 
@@ -24,7 +25,13 @@ export async function importScansAction(
   _prev: ImportState | undefined,
   formData: FormData
 ): Promise<ImportState> {
-  const user = await requireUser();
+  let user;
+  try {
+    user = await requireCapability("scan:import");
+  } catch (e) {
+    if (e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
   const systemId = String(formData.get("systemId") ?? "");
   if (!systemId) return { error: "Select a system." };
 
@@ -64,7 +71,7 @@ export async function importScansAction(
 }
 
 export async function generatePoamsAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireCapability("poam:generate");
   const systemId = String(formData.get("systemId") ?? "");
   if (!systemId) return;
   await generatePoams(systemId, user.id);

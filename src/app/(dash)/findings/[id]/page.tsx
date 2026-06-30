@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { SeverityBadge, FindingStatusBadge } from "@/components/badges";
 import { fmtDate, poamNumber } from "@/lib/format";
 import { addCommentAction, updateFindingAction } from "@/app/actions/findings";
+import { getSessionUser } from "@/lib/auth";
+import { can } from "@/lib/rbac";
 import type { FindingStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +35,10 @@ export default async function FindingDetail({
   ]);
 
   if (!finding) notFound();
+
+  const sessionUser = await getSessionUser();
+  const canUpdate = sessionUser ? can(sessionUser.role, "finding:update") : false;
+  const canComment = sessionUser ? can(sessionUser.role, "comment:create") : false;
 
   return (
     <div className="space-y-5">
@@ -92,16 +98,18 @@ export default async function FindingDetail({
                 <li className="text-sm text-ink-500">No comments yet.</li>
               )}
             </ul>
-            <form action={addCommentAction} className="mt-3 flex gap-2">
-              <input type="hidden" name="findingId" value={finding.id} />
-              <input
-                name="body"
-                placeholder="Add a comment for the team…"
-                className="input"
-                required
-              />
-              <button className="btn-primary shrink-0">Post</button>
-            </form>
+            {canComment && (
+              <form action={addCommentAction} className="mt-3 flex gap-2">
+                <input type="hidden" name="findingId" value={finding.id} />
+                <input
+                  name="body"
+                  placeholder="Add a comment for the team…"
+                  className="input"
+                  required
+                />
+                <button className="btn-primary shrink-0">Post</button>
+              </form>
+            )}
           </div>
         </div>
 
@@ -109,6 +117,12 @@ export default async function FindingDetail({
         <div className="space-y-5">
           <div className="card p-5">
             <h2 className="mb-3 text-sm font-semibold text-ink-700">Triage</h2>
+            {!canUpdate && (
+              <p className="text-sm text-ink-500">
+                Your role has read-only access to finding status.
+              </p>
+            )}
+            {canUpdate && (
             <form action={updateFindingAction} className="space-y-3">
               <input type="hidden" name="findingId" value={finding.id} />
               <div>
@@ -130,6 +144,7 @@ export default async function FindingDetail({
               </div>
               <button className="btn-primary w-full">Save</button>
             </form>
+            )}
           </div>
 
           <div className="card p-5 text-sm">
