@@ -21,6 +21,7 @@ async function main() {
     prisma.mitigationControl.deleteMany(),
     prisma.finding.deleteMany(),
     prisma.poam.deleteMany(),
+    prisma.postureSnapshot.deleteMany(),
     prisma.scanImport.deleteMany(),
     prisma.asset.deleteMany(),
     prisma.systemControl.deleteMany(),
@@ -167,6 +168,46 @@ async function main() {
     await prisma.systemControl.create({ data: { systemId: system.id, ...sc } });
   }
   console.log("  SSP: 4 control narratives");
+
+  // --- Synthesize a backdated ConMon posture trend ---
+  // The live imports above each produced a snapshot at "now"; add weekly
+  // history declining toward the current posture so the trend chart is useful.
+  const curBySev = await prisma.finding.groupBy({
+    by: ["severity"],
+    where: { systemId: system.id, status: "OPEN" },
+    _count: true,
+  });
+  const cur = (s: string) => curBySev.find((g) => g.severity === s)?._count ?? 0;
+  const target = {
+    c: cur("CRITICAL"),
+    h: cur("HIGH"),
+    m: cur("MEDIUM"),
+    l: cur("LOW"),
+  };
+  const weeks = 9;
+  for (let w = weeks; w >= 1; w--) {
+    const factor = 1 + w / 3; // older = more open findings
+    const takenAt = new Date();
+    takenAt.setDate(takenAt.getDate() - w * 7);
+    const openCritical = Math.round(target.c * factor);
+    const openHigh = Math.round(target.h * factor);
+    const openMedium = Math.round(target.m * factor);
+    const openLow = Math.round(target.l * factor);
+    const totalOpen = openCritical + openHigh + openMedium + openLow;
+    await prisma.postureSnapshot.create({
+      data: {
+        systemId: system.id,
+        takenAt,
+        openCritical,
+        openHigh,
+        openMedium,
+        openLow,
+        totalOpen,
+        closedTotal: Math.round((weeks - w) * 1.5),
+      },
+    });
+  }
+  console.log(`  ConMon: ${weeks} weeks of posture history`);
 
   console.log("Seed complete.");
 }

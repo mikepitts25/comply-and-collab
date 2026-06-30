@@ -99,6 +99,7 @@ model System {
   poams       Poam[]
   scanImports ScanImport[]
   controls    SystemControl[]
+  snapshots   PostureSnapshot[]
 }
 
 enum AssetType {
@@ -234,6 +235,26 @@ enum FindingSource {
   MANUAL
 }
 
+// Point-in-time open-finding posture for a system — appended on each scan
+// import (and optionally on a schedule) to build continuous-monitoring trends.
+model PostureSnapshot {
+  id        String   @id @default(cuid())
+  system    System   @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId  String
+  takenAt   DateTime @default(now())
+  scanImportId String? // the import that triggered this snapshot, if any
+
+  openCritical Int @default(0)
+  openHigh     Int @default(0)
+  openMedium   Int @default(0)
+  openLow      Int @default(0)
+  totalOpen    Int @default(0)
+  // Cumulative closure tracking for burndown
+  closedTotal  Int @default(0)
+
+  @@index([systemId, takenAt])
+}
+
 // Normalized severity across ACAS (CVSS/plugin) and STIG (CAT) sources.
 enum Severity {
   CRITICAL // CAT I-equivalent critical
@@ -288,6 +309,10 @@ model Finding {
 
   firstSeen DateTime @default(now())
   lastSeen  DateTime @default(now())
+  // Set when a finding stops appearing in scans (auto-closed by rescan) or is
+  // manually closed — drives burndown and aging metrics.
+  closedAt          DateTime?
+  resolvedByRescan  Boolean   @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
