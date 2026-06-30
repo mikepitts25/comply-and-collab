@@ -12,6 +12,7 @@ export type Capability =
   | "mitigation:create"
   | "mitigation:approve"
   | "catalog:load"
+  | "inventory:manage"
   | "comment:create";
 
 const ALL: Capability[] = [
@@ -23,6 +24,7 @@ const ALL: Capability[] = [
   "mitigation:create",
   "mitigation:approve",
   "catalog:load",
+  "inventory:manage",
   "comment:create",
 ];
 
@@ -36,6 +38,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     "poam:milestone",
     "mitigation:create",
     "mitigation:approve",
+    "inventory:manage",
     "comment:create",
   ],
   ISSO: [
@@ -45,6 +48,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     "poam:update",
     "poam:milestone",
     "mitigation:create",
+    "inventory:manage",
     "comment:create",
   ],
   ANALYST: [
@@ -54,10 +58,11 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     "poam:update",
     "poam:milestone",
     "mitigation:create",
+    "inventory:manage",
     "comment:create",
   ],
-  // Engineers remediate: update finding status, work milestones, discuss.
-  ENGINEER: ["finding:update", "poam:milestone", "comment:create"],
+  // Engineers remediate and maintain inventory.
+  ENGINEER: ["finding:update", "poam:milestone", "inventory:manage", "comment:create"],
   // Auditors observe and may annotate, but cannot change compliance state.
   AUDITOR: ["comment:create"],
 };

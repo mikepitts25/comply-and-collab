@@ -170,6 +170,64 @@ async function main() {
   }
   console.log("  SSP: 4 control narratives");
 
+  // --- Hardware / software inventory + PPSM ---
+  const assets = await prisma.asset.findMany({ where: { systemId: system.id } });
+  const hw: Record<string, { manufacturer: string; model: string; location: string; virtual: boolean }> = {
+    web: { manufacturer: "Dell", model: "PowerEdge R760", location: "Bldg 5 / Rack A12", virtual: true },
+    db: { manufacturer: "Dell", model: "PowerEdge R760", location: "Bldg 5 / Rack A13", virtual: false },
+    app: { manufacturer: "HPE", model: "ProLiant DL380", location: "Bldg 5 / Rack A14", virtual: true },
+  };
+  for (const a of assets) {
+    const key = a.hostname.startsWith("db") ? "db" : a.hostname.startsWith("app") ? "app" : "web";
+    const d = hw[key];
+    await prisma.asset.update({
+      where: { id: a.id },
+      data: {
+        manufacturer: d.manufacturer,
+        model: d.model,
+        location: d.location,
+        virtual: d.virtual,
+        serialNumber: `SN-${a.hostname.replace(/\W/g, "").toUpperCase().slice(0, 6)}${Math.floor(1000 + Math.random() * 9000)}`,
+      },
+    });
+  }
+  // Software for the primary web/db/app hosts
+  const swByHost: Record<string, Array<{ name: string; version: string; vendor: string; type: any }>> = {
+    web: [
+      { name: "Red Hat Enterprise Linux", version: "8.8", vendor: "Red Hat", type: "OPERATING_SYSTEM" },
+      { name: "Apache HTTP Server", version: "2.4.37", vendor: "Apache", type: "APPLICATION" },
+      { name: "OpenSSL", version: "1.1.1k", vendor: "OpenSSL", type: "MIDDLEWARE" },
+    ],
+    db: [
+      { name: "Red Hat Enterprise Linux", version: "8.8", vendor: "Red Hat", type: "OPERATING_SYSTEM" },
+      { name: "PostgreSQL", version: "13.11", vendor: "PostgreSQL", type: "DATABASE" },
+    ],
+    app: [
+      { name: "Windows Server", version: "2022", vendor: "Microsoft", type: "OPERATING_SYSTEM" },
+      { name: "Microsoft IIS", version: "10.0", vendor: "Microsoft", type: "APPLICATION" },
+      { name: ".NET Runtime", version: "8.0", vendor: "Microsoft", type: "MIDDLEWARE" },
+    ],
+  };
+  let swCount = 0;
+  for (const a of assets) {
+    const key = a.hostname.startsWith("db") ? "db" : a.hostname.startsWith("app") ? "app" : "web";
+    // Only populate the canonical hosts to avoid duplicates across name variants
+    if (!["web01.demo.mil", "db01.demo.mil", "app01"].includes(a.hostname)) continue;
+    for (const s of swByHost[key]) {
+      await prisma.softwareComponent.create({ data: { assetId: a.id, ...s } });
+      swCount++;
+    }
+  }
+  // PPSM entries for the system boundary
+  const ppsm = [
+    { port: "443", protocol: "TCP" as const, service: "HTTPS (web app)", direction: "INBOUND" as const, boundary: "Enclave / IL5 boundary", classification: "CUI", status: "APPROVED" as const, justification: "Mission user access to the web application over TLS 1.2+." },
+    { port: "22", protocol: "TCP" as const, service: "SSH (admin via bastion)", direction: "INBOUND" as const, boundary: "Management VLAN", classification: "CUI", status: "APPROVED" as const, justification: "Administrative access restricted to bastion host with MFA." },
+    { port: "5432", protocol: "TCP" as const, service: "PostgreSQL", direction: "INBOUND" as const, boundary: "Internal app↔db", classification: "CUI", status: "APPROVED" as const, justification: "Application-to-database traffic within the boundary." },
+    { port: "514", protocol: "UDP" as const, service: "Syslog to SIEM", direction: "OUTBOUND" as const, boundary: "Enclave / IL5 boundary", classification: "CUI", status: "PENDING" as const, justification: "Forward audit logs to enterprise SIEM; awaiting CCB approval." },
+  ];
+  for (const p of ppsm) await prisma.ppsmEntry.create({ data: { systemId: system.id, ...p } });
+  console.log(`  Inventory: HW on ${assets.length} assets, ${swCount} software, ${ppsm.length} PPSM entries`);
+
   // --- Synthesize a backdated ConMon posture trend ---
   // The live imports above each produced a snapshot at "now"; add weekly
   // history declining toward the current posture so the trend chart is useful.

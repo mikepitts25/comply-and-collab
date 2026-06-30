@@ -7,10 +7,14 @@ export async function gatherSsp(systemId: string) {
   const system = await prisma.system.findUnique({
     where: { id: systemId },
     include: {
-      assets: { orderBy: { hostname: "asc" } },
+      assets: {
+        orderBy: { hostname: "asc" },
+        include: { _count: { select: { software: true } } },
+      },
       controls: { include: { control: true }, orderBy: { controlId: "asc" } },
       findings: { where: { status: "OPEN" }, select: { severity: true } },
       poams: { select: { status: true } },
+      ppsm: { orderBy: [{ status: "asc" }, { port: "asc" }] },
     },
   });
   if (!system) return null;
@@ -81,7 +85,18 @@ export function sspMarkdown(d: SspData): string {
   }
   if (s.assets.length === 0) L.push(`| — | — | — | — |`);
   L.push("");
-  L.push("## 4. Control Implementation Summary");
+  L.push("## 4. Ports, Protocols, and Services (PPSM)");
+  L.push("");
+  L.push(`| Port | Protocol | Service | Direction | Boundary | Status |`);
+  L.push(`| --- | --- | --- | --- | --- | --- |`);
+  for (const p of s.ppsm) {
+    L.push(
+      `| ${p.port} | ${p.protocol} | ${p.service} | ${p.direction} | ${p.boundary ?? "—"} | ${p.status} |`
+    );
+  }
+  if (s.ppsm.length === 0) L.push(`| — | — | — | — | — | — |`);
+  L.push("");
+  L.push("## 5. Control Implementation Summary");
   L.push("");
   L.push(
     `Implemented: ${d.statusCount("IMPLEMENTED")} · ` +
@@ -101,7 +116,7 @@ export function sspMarkdown(d: SspData): string {
       L.push("");
     }
   }
-  L.push("## 5. Risk Posture");
+  L.push("## 6. Risk Posture");
   L.push("");
   L.push(
     `Open findings — Critical: ${d.sevCount("CRITICAL")}, High: ${d.sevCount("HIGH")}, ` +

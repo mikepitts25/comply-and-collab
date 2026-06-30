@@ -94,7 +94,30 @@ export default async function SspPage({
           </table>
         </Section>
 
-        <Section n="4" title="Control Implementation Summary">
+        <Section n="4" title="Ports, Protocols, and Services (PPSM)">
+          <table className="w-full border border-ink-200 text-xs">
+            <thead className="bg-ink-50">
+              <tr>
+                <Th>Port</Th><Th>Protocol</Th><Th>Service</Th>
+                <Th>Direction</Th><Th>Boundary</Th><Th>Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {s.ppsm.map((p) => (
+                <tr key={p.id} className="border-t border-ink-100">
+                  <Td>{p.port}</Td><Td>{p.protocol}</Td><Td>{p.service}</Td>
+                  <Td>{p.direction}</Td><Td>{p.boundary ?? "—"}</Td>
+                  <Td>{p.status[0] + p.status.slice(1).toLowerCase()}</Td>
+                </tr>
+              ))}
+              {s.ppsm.length === 0 && (
+                <tr><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td></tr>
+              )}
+            </tbody>
+          </table>
+        </Section>
+
+        <Section n="5" title="Control Implementation Summary">
           <p className="mb-4 text-xs text-ink-500">
             Implemented {d.statusCount("IMPLEMENTED")} · Partial{" "}
             {d.statusCount("PARTIALLY_IMPLEMENTED")} · Planned{" "}
@@ -128,7 +151,7 @@ export default async function SspPage({
           )}
         </Section>
 
-        <Section n="5" title="Risk Posture">
+        <Section n="6" title="Risk Posture">
           <p>
             Open findings — Critical: {d.sevCount("CRITICAL")}, High:{" "}
             {d.sevCount("HIGH")}, Medium: {d.sevCount("MEDIUM")}, Low:{" "}
