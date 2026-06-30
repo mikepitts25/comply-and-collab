@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { SeverityBadge, PoamStatusBadge } from "@/components/badges";
 import { fmtDate, daysUntil, poamNumber } from "@/lib/format";
+import { Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +19,16 @@ export default async function PoamsPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink-900">Plan of Action &amp; Milestones</h1>
-        <p className="text-sm text-ink-500">
-          Auto-generated from open findings, grouped by weakness and mapped to controls.
-        </p>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-ink-900">Plan of Action &amp; Milestones</h1>
+          <p className="text-sm text-ink-500">
+            Auto-generated from open findings, grouped by weakness and mapped to controls.
+          </p>
+        </div>
+        <a href="/api/export/poam" className="btn-ghost" download>
+          <Download className="h-4 w-4" /> Export eMASS CSV
+        </a>
       </div>
 
       <div className="card overflow-hidden">

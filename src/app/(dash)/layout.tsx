@@ -25,7 +25,7 @@ export default async function DashLayout({
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-ink-200 bg-white px-6 py-3">
+        <header className="flex items-center justify-between border-b border-ink-200 bg-white px-6 py-3 print:hidden">
           <div className="text-sm text-ink-500">
             On-prem deployment · IL5 enclave
           </div>
@@ -43,7 +43,7 @@ export default async function DashLayout({
             </form>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 print:overflow-visible print:p-0">{children}</main>
       </div>
     </div>
   );
