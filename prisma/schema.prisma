@@ -40,6 +40,24 @@ model User {
   mitigationStatements MitigationStatement[]
   activities           Activity[]
   findingAssignments   Finding[]            @relation("FindingAssignee")
+  apiKeys              ApiKey[]
+}
+
+// API key for programmatic / automated scan ingestion. The plaintext key is
+// shown once at creation; only its SHA-256 hash is stored. Actions run as the
+// owning user, so the user's role/capabilities apply.
+model ApiKey {
+  id         String    @id @default(cuid())
+  name       String
+  prefix     String // leading chars, for identification in the UI
+  hash       String    @unique // sha256 of the full key
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
