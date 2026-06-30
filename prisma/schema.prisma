@@ -100,6 +100,7 @@ model System {
   scanImports ScanImport[]
   controls    SystemControl[]
   snapshots   PostureSnapshot[]
+  ppsm        PpsmEntry[]
 }
 
 enum AssetType {
@@ -127,12 +128,87 @@ model Asset {
   type     AssetType @default(SERVER)
   notes    String?
 
+  // Hardware inventory detail (for the system hardware list / ATO package)
+  manufacturer String?
+  model        String?
+  serialNumber String?
+  location     String?
+  virtual      Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   findings Finding[]
+  software SoftwareComponent[]
 
   @@unique([systemId, hostname])
+  @@index([systemId])
+}
+
+enum SoftwareType {
+  OPERATING_SYSTEM
+  APPLICATION
+  DATABASE
+  MIDDLEWARE
+  DRIVER
+  FIRMWARE
+  OTHER
+}
+
+// Per-asset software inventory entry (system software list).
+model SoftwareComponent {
+  id      String       @id @default(cuid())
+  asset   Asset        @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetId String
+  name    String
+  version String?
+  vendor  String?
+  type    SoftwareType @default(APPLICATION)
+  eol     DateTime? // end-of-life / end-of-support date
+  notes   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([assetId])
+}
+
+enum Protocol {
+  TCP
+  UDP
+  ICMP
+  OTHER
+}
+
+enum FlowDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+}
+
+enum PpsmStatus {
+  APPROVED
+  PENDING
+  DENIED
+}
+
+// Ports, Protocols, and Services Management (PPSM) registration entry.
+model PpsmEntry {
+  id        String        @id @default(cuid())
+  system    System        @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId  String
+  port      String // single port or range, e.g. "443" or "8080-8090"
+  protocol  Protocol      @default(TCP)
+  service   String
+  direction FlowDirection @default(INBOUND)
+  boundary  String? // boundary crossed, e.g. "Enclave / IL5 boundary"
+  dataDescription String?
+  classification  String? // e.g. "CUI", "Unclassified"
+  status    PpsmStatus    @default(PENDING)
+  justification String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([systemId])
 }
 

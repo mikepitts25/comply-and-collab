@@ -7,7 +7,7 @@ import { generatePoamsAction } from "@/app/actions/import";
 import { frameworkLabel } from "@/lib/data/families";
 import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { ClipboardPlus, FileText, Download } from "lucide-react";
+import { ClipboardPlus, FileText, Download, Boxes } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +63,14 @@ export default async function SystemDetail({
           )}
         </div>
         <div className="flex items-center gap-2">
+          <a
+            href={`/systems/${system.id}/inventory`}
+            className="btn-ghost"
+            title="Hardware, software, and PPSM inventory"
+          >
+            <Boxes className="h-4 w-4" />
+            Inventory
+          </a>
           <a
             href={`/systems/${system.id}/ssp`}
             className="btn-ghost"
