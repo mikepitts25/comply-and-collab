@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<NessusClientData_v2>
+  <Policy>
+    <policyName>ACAS Credentialed Compliance Scan</policyName>
+  </Policy>
+  <Report name="ACAS Credentialed Compliance Scan">
+    <ReportHost name="web01.demo.mil">
+      <HostProperties>
+        <tag name="host-ip">10.10.20.11</tag>
+        <tag name="host-fqdn">web01.demo.mil</tag>
+        <tag name="mac-address">00:50:56:9a:11:01</tag>
+        <tag name="operating-system">Red Hat Enterprise Linux 8</tag>
+      </HostProperties>
+      <ReportItem port="0" svc_name="general" protocol="tcp" severity="4" pluginID="190123" pluginName="RHEL 8 : kernel security update (Critical)" pluginFamily="Red Hat Local Security Checks">
+        <risk_factor>Critical</risk_factor>
+        <synopsis>The remote Red Hat host is missing a critical kernel security update.</synopsis>
+        <description>A kernel flaw allows local privilege escalation (CVE-2024-12345). An attacker could gain root.</description>
+        <solution>Update the kernel package to the latest version and reboot.</solution>
+        <cve>CVE-2024-12345</cve>
+      </ReportItem>
+      <ReportItem port="443" svc_name="https" protocol="tcp" severity="3" pluginID="200456" pluginName="SSL Certificate Signed Using Weak Hashing Algorithm" pluginFamily="General">
+        <risk_factor>High</risk_factor>
+        <synopsis>The SSL certificate has been signed using a weak hash algorithm.</synopsis>
+        <description>The remote service uses an SSL certificate signed with SHA-1, which is cryptographically weak.</description>
+        <solution>Reissue the certificate using SHA-256 or stronger.</solution>
+      </ReportItem>
+      <ReportItem port="22" svc_name="ssh" protocol="tcp" severity="2" pluginID="210789" pluginName="SSH Weak Key Exchange Algorithms Enabled" pluginFamily="Misc.">
+        <risk_factor>Medium</risk_factor>
+        <synopsis>The SSH server allows weak key exchange algorithms.</synopsis>
+        <description>The remote SSH server is configured to allow weak key exchange algorithms.</description>
+        <solution>Disable weak KEX algorithms in sshd_config.</solution>
+      </ReportItem>
+    </ReportHost>
+    <ReportHost name="db01.demo.mil">
+      <HostProperties>
+        <tag name="host-ip">10.10.20.21</tag>
+        <tag name="host-fqdn">db01.demo.mil</tag>
+        <tag name="mac-address">00:50:56:9a:11:02</tag>
+        <tag name="operating-system">Red Hat Enterprise Linux 8</tag>
+      </HostProperties>
+      <ReportItem port="0" svc_name="general" protocol="tcp" severity="4" pluginID="190123" pluginName="RHEL 8 : kernel security update (Critical)" pluginFamily="Red Hat Local Security Checks">
+        <risk_factor>Critical</risk_factor>
+        <synopsis>The remote Red Hat host is missing a critical kernel security update.</synopsis>
+        <description>A kernel flaw allows local privilege escalation (CVE-2024-12345). An attacker could gain root.</description>
+        <solution>Update the kernel package to the latest version and reboot.</solution>
+        <cve>CVE-2024-12345</cve>
+      </ReportItem>
+      <ReportItem port="5432" svc_name="postgresql" protocol="tcp" severity="2" pluginID="220890" pluginName="PostgreSQL Default Credentials" pluginFamily="Databases">
+        <risk_factor>Medium</risk_factor>
+        <synopsis>The database may be using default credentials.</synopsis>
+        <description>The PostgreSQL instance appears to accept a default/weak password for an administrative account.</description>
+        <solution>Set a strong, unique password and disable unused default accounts.</solution>
+      </ReportItem>
+    </ReportHost>
+  </Report>
+</NessusClientData_v2>

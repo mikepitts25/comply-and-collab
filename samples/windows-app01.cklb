@@ -1,0 +1,76 @@
+{
+  "title": "Windows Server 2022 STIG Checklist",
+  "cklb_version": "1.0",
+  "target_data": {
+    "host_name": "app01",
+    "fqdn": "app01.demo.mil",
+    "ip_address": "10.10.20.31",
+    "mac_address": "00:50:56:9A:11:03",
+    "comments": "Windows Server 2022 Standard"
+  },
+  "stigs": [
+    {
+      "display_name": "Microsoft Windows Server 2022 Security Technical Implementation Guide",
+      "stig_id": "MS_Windows_Server_2022_STIG",
+      "version": "1",
+      "rules": [
+        {
+          "group_id": "V-254238",
+          "rule_id": "SV-254238r848590_rule",
+          "rule_version": "WN22-00-000010",
+          "rule_title": "Windows Server 2022 must use an anti-virus program.",
+          "severity": "high",
+          "discussion": "Malicious software protection is required to detect and remediate malware.",
+          "check_content": "Verify a supported anti-virus solution is installed and running.",
+          "fix_text": "Install and enable an approved anti-virus solution (e.g., Microsoft Defender/HBSS/ESS).",
+          "status": "not_a_finding",
+          "finding_details": "Microsoft Defender active with current signatures.",
+          "comments": "",
+          "ccis": ["CCI-000366"]
+        },
+        {
+          "group_id": "V-254292",
+          "rule_id": "SV-254292r848652_rule",
+          "rule_version": "WN22-AC-000010",
+          "rule_title": "Windows Server 2022 account lockout threshold must be configured to 3 or fewer invalid attempts.",
+          "severity": "medium",
+          "discussion": "Locking accounts after repeated failed attempts mitigates brute-force attacks.",
+          "check_content": "Verify the account lockout threshold via secpol.msc.",
+          "fix_text": "Set Account lockout threshold to 3 invalid attempts.",
+          "status": "open",
+          "finding_details": "Threshold currently set to 0 (never lock).",
+          "comments": "Pending GPO change request.",
+          "ccis": ["CCI-000044"]
+        },
+        {
+          "group_id": "V-254357",
+          "rule_id": "SV-254357r848700_rule",
+          "rule_version": "WN22-SO-000100",
+          "rule_title": "Windows Server 2022 must require BitLocker or approved encryption for data at rest.",
+          "severity": "medium",
+          "discussion": "Encryption at rest protects information if media is lost or stolen.",
+          "check_content": "Verify BitLocker is enabled on fixed data drives.",
+          "fix_text": "Enable BitLocker with a FIPS-validated algorithm on all fixed drives.",
+          "status": "open",
+          "finding_details": "D: data volume not encrypted.",
+          "comments": "",
+          "ccis": ["CCI-002476"]
+        },
+        {
+          "group_id": "V-254401",
+          "rule_id": "SV-254401r848760_rule",
+          "rule_version": "WN22-SO-000300",
+          "rule_title": "Windows Server 2022 must display the Standard Mandatory DoD Notice and Consent Banner before logon.",
+          "severity": "low",
+          "discussion": "The DoD consent banner notifies users of monitoring before access.",
+          "check_content": "Verify the legal notice text and caption are configured.",
+          "fix_text": "Configure the interactive logon legal notice with the approved DoD banner.",
+          "status": "open",
+          "finding_details": "Logon banner not configured.",
+          "comments": "",
+          "ccis": ["CCI-000048"]
+        }
+      ]
+    }
+  ]
+}

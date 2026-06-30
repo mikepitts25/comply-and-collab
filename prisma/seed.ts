@@ -1,0 +1,171 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+import { CONTROLS, CCIS } from "../src/lib/data/catalog";
+import { ingestScan } from "../src/lib/ingest";
+import { generatePoams } from "../src/lib/poam";
+
+const prisma = new PrismaClient();
+const SAMPLES = join(process.cwd(), "samples");
+
+async function main() {
+  console.log("Seeding Comply & Collab...");
+
+  // --- Wipe (idempotent dev seed) ---
+  await prisma.$transaction([
+    prisma.comment.deleteMany(),
+    prisma.milestone.deleteMany(),
+    prisma.findingControl.deleteMany(),
+    prisma.poamControl.deleteMany(),
+    prisma.mitigationControl.deleteMany(),
+    prisma.finding.deleteMany(),
+    prisma.poam.deleteMany(),
+    prisma.scanImport.deleteMany(),
+    prisma.asset.deleteMany(),
+    prisma.systemControl.deleteMany(),
+    prisma.mitigationStatement.deleteMany(),
+    prisma.activity.deleteMany(),
+    prisma.system.deleteMany(),
+    prisma.cci.deleteMany(),
+    prisma.control.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
+
+  // --- Control catalog ---
+  for (const c of CONTROLS) {
+    await prisma.control.create({
+      data: {
+        id: c.id,
+        family: c.family,
+        title: c.title,
+        text: c.text,
+        baselineLow: c.baselines.includes("L"),
+        baselineModerate: c.baselines.includes("M"),
+        baselineHigh: c.baselines.includes("H"),
+      },
+    });
+  }
+  for (const cci of CCIS) {
+    await prisma.cci.create({
+      data: { id: cci.id, definition: cci.definition, controlId: cci.controlId },
+    });
+  }
+  console.log(`  Catalog: ${CONTROLS.length} controls, ${CCIS.length} CCIs`);
+
+  // --- Users ---
+  const pw = await bcrypt.hash("Password123!", 10);
+  const [admin, issm, analyst, engineer] = await Promise.all([
+    prisma.user.create({ data: { email: "admin@demo.mil", name: "Avery Admin", role: "ADMIN", passwordHash: pw } }),
+    prisma.user.create({ data: { email: "issm@demo.mil", name: "Morgan ISSM", role: "ISSM", passwordHash: pw } }),
+    prisma.user.create({ data: { email: "analyst@demo.mil", name: "Riley Analyst", role: "ANALYST", passwordHash: pw } }),
+    prisma.user.create({ data: { email: "engineer@demo.mil", name: "Jordan Engineer", role: "ENGINEER", passwordHash: pw } }),
+  ]);
+  console.log("  Users: admin / issm / analyst / engineer @demo.mil (pw: Password123!)");
+
+  // --- System ---
+  const atoDate = new Date();
+  atoDate.setMonth(atoDate.getMonth() - 9);
+  const atoExpiration = new Date(atoDate);
+  atoExpiration.setFullYear(atoExpiration.getFullYear() + 3);
+
+  const system = await prisma.system.create({
+    data: {
+      name: "Mission Data Platform",
+      acronym: "MDP",
+      description:
+        "Web application and database platform processing mission planning data. Hosted in an on-prem IL5 enclave.",
+      confidentiality: "HIGH",
+      integrity: "MODERATE",
+      availability: "MODERATE",
+      categorization: "HIGH",
+      frameworks: ["RMF_800_53", "STIG"],
+      authorizationStatus: "ATO",
+      atoDate,
+      atoExpiration,
+      authorizingOfficial: "Col. P. Stone (AO)",
+    },
+  });
+  console.log(`  System: ${system.name} (${system.acronym})`);
+
+  // --- Ingest the sample scans through the real pipeline ---
+  const files: Array<{ name: string }> = [
+    { name: "acas-scan.nessus" },
+    { name: "rhel8-web01.ckl" },
+    { name: "windows-app01.cklb" },
+  ];
+  for (const f of files) {
+    const content = readFileSync(join(SAMPLES, f.name), "utf8");
+    const res = await ingestScan({
+      systemId: system.id,
+      userId: analyst.id,
+      filename: f.name,
+      content,
+    });
+    console.log(
+      `  Imported ${f.name}: ${res.totalFindings} findings (${res.openFindings} open) across ${res.assets} asset(s)`
+    );
+  }
+
+  // --- Auto-generate POA&Ms from open findings ---
+  const gen = await generatePoams(system.id, analyst.id);
+  console.log(`  Generated ${gen.created} POA&M(s) from ${gen.linked} open finding(s)`);
+
+  // Assign a couple of POA&Ms to the engineer and set one ongoing.
+  const poams = await prisma.poam.findMany({ where: { systemId: system.id }, orderBy: { number: "asc" } });
+  if (poams[0]) await prisma.poam.update({ where: { id: poams[0].id }, data: { ownerId: engineer.id, status: "ONGOING" } });
+  if (poams[1]) await prisma.poam.update({ where: { id: poams[1].id }, data: { ownerId: engineer.id } });
+
+  // Assign the highest-severity open findings to the engineer.
+  const criticalFindings = await prisma.finding.findMany({
+    where: { systemId: system.id, status: "OPEN", severity: { in: ["CRITICAL", "HIGH"] } },
+  });
+  for (const f of criticalFindings) {
+    await prisma.finding.update({ where: { id: f.id }, data: { assigneeId: engineer.id } });
+  }
+
+  // --- Mitigation statement library ---
+  await prisma.mitigationStatement.create({
+    data: {
+      title: "DoD Consent Banner — compensating control",
+      body: "Where the login banner cannot be displayed at the application layer, the enclave boundary device presents the Standard Mandatory DoD Notice and Consent Banner. Physical access is restricted to cleared personnel within a controlled facility, and all sessions are logged.",
+      tags: ["banner", "AC-8", "consent"],
+      approved: true,
+      authorId: issm.id,
+      controlLinks: { create: [{ controlId: "AC-8" }] },
+    },
+  });
+  await prisma.mitigationStatement.create({
+    data: {
+      title: "Weak password hashing — interim mitigation",
+      body: "Pending migration to SHA-512, the affected hosts enforce 15-character minimum passwords, account lockout after 3 attempts, and are accessible only via bastion with MFA. Offline credential exposure risk is reduced by full-disk encryption.",
+      tags: ["IA-5", "password", "crypto"],
+      approved: false,
+      authorId: analyst.id,
+      controlLinks: { create: [{ controlId: "IA-5" }] },
+    },
+  });
+  console.log("  Mitigation library: 2 statements");
+
+  // --- A few SSP control implementation narratives ---
+  const sysControlData = [
+    { controlId: "AC-7", status: "PARTIALLY_IMPLEMENTED" as const, narrative: "Account lockout enforced on Windows via GPO; RHEL pam_faillock remediation in progress (see POA&M)." },
+    { controlId: "SI-2", status: "IMPLEMENTED" as const, narrative: "Patch management via Red Hat Satellite and WSUS; ACAS scans weekly; critical patches within 15 days." },
+    { controlId: "CM-6", status: "PARTIALLY_IMPLEMENTED" as const, narrative: "STIGs applied via Ansible baseline; open findings tracked in POA&Ms." },
+    { controlId: "SC-28", status: "PLANNED" as const, narrative: "BitLocker rollout planned for all data volumes this quarter." },
+  ];
+  for (const sc of sysControlData) {
+    await prisma.systemControl.create({ data: { systemId: system.id, ...sc } });
+  }
+  console.log("  SSP: 4 control narratives");
+
+  console.log("Seed complete.");
+}
+
+main()
+  .then(() => prisma.$disconnect())
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

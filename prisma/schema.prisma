@@ -1,0 +1,456 @@
+// Comply & Collab — data model
+// Domain: RMF/ATO lifecycle, ACAS + STIG findings, POA&Ms, mitigation reuse.
+// Designed for air-gapped PostgreSQL deployments.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// People & access
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN // app administrator
+  ISSM // Information System Security Manager
+  ISSO // Information System Security Officer
+  ANALYST // compliance / security control assessor
+  ENGINEER // system / DevOps engineer remediating findings
+  AUDITOR // read-only oversight
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(ANALYST)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  scanImports          ScanImport[]
+  poamsOwned           Poam[]               @relation("PoamOwner")
+  comments             Comment[]
+  mitigationStatements MitigationStatement[]
+  activities           Activity[]
+  findingAssignments   Finding[]            @relation("FindingAssignee")
+}
+
+// ---------------------------------------------------------------------------
+// Systems, boundaries & assets
+// ---------------------------------------------------------------------------
+
+enum ImpactLevel {
+  LOW
+  MODERATE
+  HIGH
+}
+
+enum AuthorizationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  ATO // Authorization to Operate
+  ATO_WITH_CONDITIONS
+  IATT // Interim Authority to Test
+  DENIED // Denial of ATO
+  EXPIRED
+  DECOMMISSIONED
+}
+
+enum Framework {
+  RMF_800_53 // NIST RMF / 800-53
+  STIG // DISA STIG / SRG
+  CMMC // CMMC 2.0 / 800-171
+  FEDRAMP // FedRAMP
+}
+
+model System {
+  id          String  @id @default(cuid())
+  name        String
+  acronym     String  @unique
+  description String?
+
+  // FIPS 199 categorization
+  confidentiality ImpactLevel @default(MODERATE)
+  integrity       ImpactLevel @default(MODERATE)
+  availability    ImpactLevel @default(MODERATE)
+  // Overall categorization (high-water mark)
+  categorization  ImpactLevel @default(MODERATE)
+
+  frameworks Framework[] @default([RMF_800_53, STIG])
+
+  // ATO lifecycle
+  authorizationStatus AuthorizationStatus @default(IN_PROGRESS)
+  atoDate             DateTime?
+  atoExpiration       DateTime?
+  authorizingOfficial String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assets      Asset[]
+  findings    Finding[]
+  poams       Poam[]
+  scanImports ScanImport[]
+  controls    SystemControl[]
+}
+
+enum AssetType {
+  SERVER
+  WORKSTATION
+  NETWORK_DEVICE
+  APPLIANCE
+  DATABASE
+  APPLICATION
+  CONTAINER
+  CLOUD_RESOURCE
+  OTHER
+}
+
+model Asset {
+  id       String    @id @default(cuid())
+  system   System    @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId String
+  hostname String
+  fqdn     String?
+  ipAddress String?
+  macAddress String?
+  osName   String?
+  osVersion String?
+  type     AssetType @default(SERVER)
+  notes    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  findings Finding[]
+
+  @@unique([systemId, hostname])
+  @@index([systemId])
+}
+
+// ---------------------------------------------------------------------------
+// Control catalog (NIST 800-53) + CCI mapping
+// ---------------------------------------------------------------------------
+
+model Control {
+  id       String  @id // e.g. "AC-2"
+  family   String // e.g. "AC"
+  title    String
+  text     String? @db.Text
+  // Baselines this control belongs to
+  baselineLow      Boolean @default(false)
+  baselineModerate Boolean @default(false)
+  baselineHigh     Boolean @default(false)
+
+  ccis           Cci[]
+  systemControls SystemControl[]
+  findingLinks   FindingControl[]
+  poamLinks      PoamControl[]
+  mitigationLinks MitigationControl[]
+
+  @@index([family])
+}
+
+// Control Correlation Identifier — the bridge between STIG rules and 800-53.
+model Cci {
+  id         String  @id // e.g. "CCI-000130"
+  definition String  @db.Text
+  control    Control? @relation(fields: [controlId], references: [id])
+  controlId  String?
+
+  findings Finding[] @relation("FindingCci")
+
+  @@index([controlId])
+}
+
+// Per-system implementation status of a control (the SSP layer).
+enum ControlStatus {
+  NOT_IMPLEMENTED
+  PLANNED
+  IMPLEMENTED
+  PARTIALLY_IMPLEMENTED
+  INHERITED
+  NOT_APPLICABLE
+}
+
+model SystemControl {
+  id        String        @id @default(cuid())
+  system    System        @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId  String
+  control   Control       @relation(fields: [controlId], references: [id])
+  controlId String
+  status    ControlStatus @default(NOT_IMPLEMENTED)
+  narrative String?       @db.Text // implementation statement / SSP narrative
+  inheritedFrom String?
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([systemId, controlId])
+  @@index([systemId])
+}
+
+// ---------------------------------------------------------------------------
+// Scan imports & findings
+// ---------------------------------------------------------------------------
+
+enum ScanType {
+  ACAS_NESSUS // Tenable/ACAS .nessus XML
+  STIG_CKL // DISA STIG Viewer .ckl (XML)
+  STIG_CKLB // DISA STIG Viewer .cklb (JSON)
+  SCAP // SCAP results
+}
+
+model ScanImport {
+  id         String   @id @default(cuid())
+  type       ScanType
+  filename   String
+  system     System   @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId   String
+  importedBy User     @relation(fields: [importedById], references: [id])
+  importedById String
+  importedAt DateTime @default(now())
+
+  // Summary counts captured at import time
+  totalFindings  Int @default(0)
+  openFindings   Int @default(0)
+  newFindings    Int @default(0)
+
+  findings Finding[]
+
+  @@index([systemId])
+}
+
+enum FindingSource {
+  ACAS
+  STIG
+  SCAP
+  MANUAL
+}
+
+// Normalized severity across ACAS (CVSS/plugin) and STIG (CAT) sources.
+enum Severity {
+  CRITICAL // CAT I-equivalent critical
+  HIGH // CAT I
+  MEDIUM // CAT II
+  LOW // CAT III
+  INFO
+}
+
+enum FindingStatus {
+  OPEN
+  NOT_A_FINDING
+  NOT_APPLICABLE
+  NOT_REVIEWED
+  CLOSED // remediated & verified
+}
+
+model Finding {
+  id     String        @id @default(cuid())
+  source FindingSource
+  system   System @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId String
+  asset    Asset?  @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  assetId  String?
+  scanImport ScanImport? @relation(fields: [scanImportId], references: [id], onDelete: SetNull)
+  scanImportId String?
+
+  // Stable identity for de-duplication across scans:
+  //  - ACAS: plugin id
+  //  - STIG: rule id (SV-...) / Group id (V-...)
+  ruleId      String // e.g. "SV-230221r627750_rule" or "19506" (plugin)
+  groupId     String? // e.g. "V-230221"
+  stigId      String? // e.g. "RHEL-08-010010"
+
+  title       String
+  description String?  @db.Text
+  severity    Severity
+  status      FindingStatus @default(OPEN)
+
+  // Remediation guidance from the source
+  checkText   String? @db.Text
+  fixText     String? @db.Text
+  comments    String? @db.Text // analyst/engineer finding details
+
+  // ACAS-specific
+  pluginId    String?
+  cve         String?
+
+  // Assignment & collaboration
+  assignee   User?   @relation("FindingAssignee", fields: [assigneeId], references: [id])
+  assigneeId String?
+
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ccis     Cci[]            @relation("FindingCci")
+  controls FindingControl[]
+  poam     Poam?            @relation(fields: [poamId], references: [id], onDelete: SetNull)
+  poamId   String?
+  comments_rel Comment[]
+
+  @@unique([systemId, ruleId, assetId])
+  @@index([systemId, status])
+  @@index([severity])
+}
+
+// Many-to-many Finding <-> Control (derived via CCI mapping).
+model FindingControl {
+  finding   Finding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  findingId String
+  control   Control @relation(fields: [controlId], references: [id])
+  controlId String
+
+  @@id([findingId, controlId])
+  @@index([controlId])
+}
+
+// ---------------------------------------------------------------------------
+// POA&Ms (Plan of Action & Milestones)
+// ---------------------------------------------------------------------------
+
+enum PoamStatus {
+  DRAFT
+  OPEN
+  ONGOING
+  RISK_ACCEPTED
+  COMPLETED
+  CLOSED
+}
+
+model Poam {
+  id       String     @id @default(cuid())
+  system   System     @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId String
+  // Sequential per-system identifier shown to users (e.g. POAM-0001)
+  number   Int
+
+  weakness        String   @db.Text
+  sourceIdentifier String? // where the weakness was identified (scan, assessment)
+  severity        Severity
+  status          PoamStatus @default(OPEN)
+  riskRating      ImpactLevel @default(MODERATE)
+
+  // Residual risk after mitigations
+  residualRisk    ImpactLevel?
+
+  recommendation  String?  @db.Text
+  resourcesRequired String? @db.Text
+
+  owner   User?   @relation("PoamOwner", fields: [ownerId], references: [id])
+  ownerId String?
+
+  detectionDate         DateTime  @default(now())
+  scheduledCompletion   DateTime?
+  actualCompletion      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  findings   Finding[]
+  milestones Milestone[]
+  controls   PoamControl[]
+  mitigations MitigationStatement[] @relation("PoamMitigation")
+  comments    Comment[]
+
+  @@unique([systemId, number])
+  @@index([systemId, status])
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  poam        Poam     @relation(fields: [poamId], references: [id], onDelete: Cascade)
+  poamId      String
+  description String
+  dueDate     DateTime?
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([poamId])
+}
+
+model PoamControl {
+  poam      Poam    @relation(fields: [poamId], references: [id], onDelete: Cascade)
+  poamId    String
+  control   Control @relation(fields: [controlId], references: [id])
+  controlId String
+
+  @@id([poamId, controlId])
+}
+
+// ---------------------------------------------------------------------------
+// Mitigation statement library (reusable across systems & POA&Ms)
+// ---------------------------------------------------------------------------
+
+model MitigationStatement {
+  id       String  @id @default(cuid())
+  title    String
+  body     String  @db.Text
+  // Tag for reuse/searchability (e.g. "Apache", "RHEL8", "encryption")
+  tags     String[]
+  approved Boolean @default(false)
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  controlLinks MitigationControl[]
+  poams        Poam[]              @relation("PoamMitigation")
+
+  @@index([approved])
+}
+
+model MitigationControl {
+  mitigation   MitigationStatement @relation(fields: [mitigationId], references: [id], onDelete: Cascade)
+  mitigationId String
+  control      Control             @relation(fields: [controlId], references: [id])
+  controlId    String
+
+  @@id([mitigationId, controlId])
+}
+
+// ---------------------------------------------------------------------------
+// Collaboration: comments & activity feed
+// ---------------------------------------------------------------------------
+
+model Comment {
+  id     String @id @default(cuid())
+  body   String @db.Text
+  author User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  finding   Finding? @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  findingId String?
+  poam      Poam?    @relation(fields: [poamId], references: [id], onDelete: Cascade)
+  poamId    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([findingId])
+  @@index([poamId])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  actor     User?    @relation(fields: [actorId], references: [id])
+  actorId   String?
+  verb      String // e.g. "imported", "created", "closed"
+  entity    String // e.g. "Finding", "Poam", "System"
+  entityId  String?
+  summary   String
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
