@@ -80,13 +80,22 @@ export default async function SystemDetail({
             SSP
           </a>
           <a
+            href={`/api/export/poam-xlsx?system=${system.id}`}
+            className="btn-ghost"
+            download
+            title="Export this system's POA&Ms as an eMASS-style XLSX workbook"
+          >
+            <Download className="h-4 w-4" />
+            POA&M XLSX
+          </a>
+          <a
             href={`/api/export/poam?system=${system.id}`}
             className="btn-ghost"
             download
             title="Export this system's POA&Ms as an eMASS-style CSV"
           >
             <Download className="h-4 w-4" />
-            POA&M CSV
+            CSV
           </a>
           {canGenerate && (
             <form action={generatePoamsAction}>

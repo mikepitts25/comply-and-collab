@@ -26,9 +26,14 @@ export default async function PoamsPage() {
             Auto-generated from open findings, grouped by weakness and mapped to controls.
           </p>
         </div>
-        <a href="/api/export/poam" className="btn-ghost" download>
-          <Download className="h-4 w-4" /> Export eMASS CSV
-        </a>
+        <div className="flex items-center gap-2">
+          <a href="/api/export/poam-xlsx" className="btn-ghost" download>
+            <Download className="h-4 w-4" /> eMASS XLSX
+          </a>
+          <a href="/api/export/poam" className="btn-ghost" download>
+            <Download className="h-4 w-4" /> CSV
+          </a>
+        </div>
       </div>
 
       <div className="card overflow-hidden">

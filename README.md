@@ -25,7 +25,7 @@
 - **Mitigation library** — reusable, control-tagged mitigation/remediation statements attachable to POA&Ms.
 - **System / ATO management** — FIPS 199 categorization, ATO status & expiration countdown, asset inventory, and SSP control-implementation narratives.
 - **Hardware/software inventory + PPSM** — per-system hardware list (make/model/serial/location/virtual), software inventory, and Ports/Protocols/Services Management registration (port, protocol, direction, boundary, classification, approval status) — flowing into the SSP.
-- **Exports** — eMASS-style POA&M CSV (per-system or all systems) and a printable System Security Plan (SSP) document with Markdown download.
+- **Exports** — eMASS-style POA&M in **XLSX** (styled workbook, frozen header, autofilter) and CSV (per-system or all systems), plus a printable System Security Plan (SSP) document with Markdown download.
 - **Continuous monitoring (ConMon)** — posture trend chart (open findings over time by severity), finding burndown, aging buckets, and scan cadence. Rescans **auto-close** remediated findings (first/last-seen reconciliation) and auto-complete fully-resolved POA&Ms.
 - **Collaboration** — per-finding and per-POA&M discussion threads, assignments, and an activity feed.
 - **Role-based access control** — capability-based RBAC enforced server-side on every mutation (Admin, ISSM, ISSO, Analyst, Engineer, Auditor), with the UI hiding actions a role can't perform and a read-only banner for observers.
@@ -137,8 +137,8 @@ samples/                 # example ACAS/STIG files
 - XLSX export against the official eMASS POA&M workbook template
 - ✅ Capability-based RBAC enforced on all mutations
 - ✅ Hardware/software inventory + PPSM (ports, protocols & services)
+- ✅ eMASS-style POA&M XLSX export (styled workbook)
 - Scheduled/automated scan ingestion (watch-folder or API)
-- XLSX export against the official eMASS POA&M workbook template
 - CAC/PIV (client-cert) authentication
 - Hardware/software inventory reconciliation and ports/protocols/services (PPSM)
 
