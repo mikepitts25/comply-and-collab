@@ -27,7 +27,7 @@
 - **Exports** — eMASS-style POA&M CSV (per-system or all systems) and a printable System Security Plan (SSP) document with Markdown download.
 - **Continuous monitoring (ConMon)** — posture trend chart (open findings over time by severity), finding burndown, aging buckets, and scan cadence. Rescans **auto-close** remediated findings (first/last-seen reconciliation) and auto-complete fully-resolved POA&Ms.
 - **Collaboration** — per-finding and per-POA&M discussion threads, assignments, and an activity feed.
-- **Roles** — Admin, ISSM, ISSO, Analyst, Engineer, Auditor.
+- **Role-based access control** — capability-based RBAC enforced server-side on every mutation (Admin, ISSM, ISSO, Analyst, Engineer, Auditor), with the UI hiding actions a role can't perform and a read-only banner for observers.
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
 
 ## Tech stack
@@ -68,6 +68,7 @@ npm run dev                          # http://localhost:3000
 | `issm@demo.mil` | ISSM | `Password123!` |
 | `analyst@demo.mil` | Compliance Analyst | `Password123!` |
 | `engineer@demo.mil` | Systems Engineer | `Password123!` |
+| `auditor@demo.mil` | Auditor (read-only) | `Password123!` |
 
 ### Sample scan files
 
@@ -133,8 +134,9 @@ samples/                 # example ACAS/STIG files
 - ✅ eMASS-compatible POA&M export (CSV) and SSP generation (printable + Markdown)
 - ✅ Continuous monitoring (ConMon) — posture trends, burndown, aging, rescan auto-closure
 - XLSX export against the official eMASS POA&M workbook template
+- ✅ Capability-based RBAC enforced on all mutations
 - Scheduled/automated scan ingestion (watch-folder or API)
-- CAC/PIV (client-cert) authentication and full RBAC enforcement
+- CAC/PIV (client-cert) authentication
 - Hardware/software inventory reconciliation and ports/protocols/services (PPSM)
 
 ---

@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireCapability } from "@/lib/rbac-server";
 import type { PoamStatus, ImpactLevel } from "@prisma/client";
 
 export async function updatePoamAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireCapability("poam:update");
   const poamId = String(formData.get("poamId"));
   const status = String(formData.get("status")) as PoamStatus;
   const ownerId = String(formData.get("ownerId") || "");
@@ -37,7 +37,7 @@ export async function updatePoamAction(formData: FormData): Promise<void> {
 }
 
 export async function toggleMilestoneAction(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireCapability("poam:milestone");
   const milestoneId = String(formData.get("milestoneId"));
   const poamId = String(formData.get("poamId"));
   const completed = String(formData.get("completed")) === "true";
@@ -50,7 +50,7 @@ export async function toggleMilestoneAction(formData: FormData): Promise<void> {
 }
 
 export async function attachMitigationAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireCapability("poam:update");
   const poamId = String(formData.get("poamId"));
   const mitigationId = String(formData.get("mitigationId") || "");
   if (!mitigationId) return;
@@ -72,7 +72,7 @@ export async function attachMitigationAction(formData: FormData): Promise<void> 
 }
 
 export async function addPoamCommentAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireCapability("comment:create");
   const poamId = String(formData.get("poamId"));
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;

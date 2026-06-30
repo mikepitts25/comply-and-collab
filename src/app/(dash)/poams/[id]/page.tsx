@@ -9,6 +9,8 @@ import {
   attachMitigationAction,
   addPoamCommentAction,
 } from "@/app/actions/poams";
+import { getSessionUser } from "@/lib/auth";
+import { can } from "@/lib/rbac";
 import { CheckCircle2, Circle } from "lucide-react";
 import type { PoamStatus } from "@prisma/client";
 
@@ -39,6 +41,11 @@ export default async function PoamDetail({
     prisma.mitigationStatement.findMany({ orderBy: { title: "asc" } }),
   ]);
   if (!poam) notFound();
+
+  const sessionUser = await getSessionUser();
+  const canUpdate = sessionUser ? can(sessionUser.role, "poam:update") : false;
+  const canMilestone = sessionUser ? can(sessionUser.role, "poam:milestone") : false;
+  const canComment = sessionUser ? can(sessionUser.role, "comment:create") : false;
 
   return (
     <div className="space-y-5">
@@ -75,18 +82,24 @@ export default async function PoamDetail({
             <ul className="space-y-2">
               {poam.milestones.map((m) => (
                 <li key={m.id} className="flex items-center gap-3">
-                  <form action={toggleMilestoneAction}>
-                    <input type="hidden" name="milestoneId" value={m.id} />
-                    <input type="hidden" name="poamId" value={poam.id} />
-                    <input type="hidden" name="completed" value={String(m.completed)} />
-                    <button className="text-ink-400 hover:text-green-600" title="Toggle complete">
-                      {m.completed ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <Circle className="h-5 w-5" />
-                      )}
-                    </button>
-                  </form>
+                  {canMilestone ? (
+                    <form action={toggleMilestoneAction}>
+                      <input type="hidden" name="milestoneId" value={m.id} />
+                      <input type="hidden" name="poamId" value={poam.id} />
+                      <input type="hidden" name="completed" value={String(m.completed)} />
+                      <button className="text-ink-400 hover:text-green-600" title="Toggle complete">
+                        {m.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <Circle className="h-5 w-5" />
+                        )}
+                      </button>
+                    </form>
+                  ) : m.completed ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-ink-400" />
+                  )}
                   <div className="flex-1">
                     <div className={m.completed ? "text-sm text-ink-400 line-through" : "text-sm text-ink-800"}>
                       {m.description}
@@ -132,18 +145,20 @@ export default async function PoamDetail({
                 <li className="text-sm text-ink-500">None attached.</li>
               )}
             </ul>
-            <form action={attachMitigationAction} className="flex gap-2">
-              <input type="hidden" name="poamId" value={poam.id} />
-              <select name="mitigationId" className="input" defaultValue="">
-                <option value="">Attach from library…</option>
-                {mitigations.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.title} {m.approved ? "✓" : "(draft)"}
-                  </option>
-                ))}
-              </select>
-              <button className="btn-ghost shrink-0">Attach</button>
-            </form>
+            {canUpdate && (
+              <form action={attachMitigationAction} className="flex gap-2">
+                <input type="hidden" name="poamId" value={poam.id} />
+                <select name="mitigationId" className="input" defaultValue="">
+                  <option value="">Attach from library…</option>
+                  {mitigations.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.title} {m.approved ? "✓" : "(draft)"}
+                    </option>
+                  ))}
+                </select>
+                <button className="btn-ghost shrink-0">Attach</button>
+              </form>
+            )}
           </div>
 
           {/* Comments */}
@@ -162,16 +177,19 @@ export default async function PoamDetail({
               ))}
               {poam.comments.length === 0 && <li className="text-sm text-ink-500">No comments yet.</li>}
             </ul>
-            <form action={addPoamCommentAction} className="mt-3 flex gap-2">
-              <input type="hidden" name="poamId" value={poam.id} />
-              <input name="body" placeholder="Add a comment…" className="input" required />
-              <button className="btn-primary shrink-0">Post</button>
-            </form>
+            {canComment && (
+              <form action={addPoamCommentAction} className="mt-3 flex gap-2">
+                <input type="hidden" name="poamId" value={poam.id} />
+                <input name="body" placeholder="Add a comment…" className="input" required />
+                <button className="btn-primary shrink-0">Post</button>
+              </form>
+            )}
           </div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-5">
+          {canUpdate && (
           <div className="card p-5">
             <h2 className="mb-3 text-sm font-semibold text-ink-700">Manage</h2>
             <form action={updatePoamAction} className="space-y-3">
@@ -205,6 +223,7 @@ export default async function PoamDetail({
               <button className="btn-primary w-full">Save</button>
             </form>
           </div>
+          )}
 
           <div className="card p-5 text-sm">
             <h2 className="mb-3 text-sm font-semibold text-ink-700">Details</h2>

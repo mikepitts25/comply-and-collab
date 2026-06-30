@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireCapability } from "@/lib/rbac-server";
 import type { FindingStatus } from "@prisma/client";
 
 export async function addCommentAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireCapability("comment:create");
   const findingId = String(formData.get("findingId"));
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
@@ -27,7 +27,7 @@ export async function addCommentAction(formData: FormData): Promise<void> {
 }
 
 export async function updateFindingAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireCapability("finding:update");
   const findingId = String(formData.get("findingId"));
   const status = String(formData.get("status")) as FindingStatus;
   const assigneeId = String(formData.get("assigneeId") || "");

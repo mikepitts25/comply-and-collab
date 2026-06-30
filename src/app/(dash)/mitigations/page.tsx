@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { fmtDate } from "@/lib/format";
 import { createMitigationAction } from "@/app/actions/mitigations";
 import { CreateMitigation } from "./create-mitigation";
+import { getSessionUser } from "@/lib/auth";
+import { can } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,8 @@ export default async function MitigationsPage() {
     }),
     prisma.control.findMany({ orderBy: { id: "asc" }, select: { id: true, title: true } }),
   ]);
+  const user = await getSessionUser();
+  const canCreate = user ? can(user.role, "mitigation:create") : false;
 
   return (
     <div className="space-y-5">
@@ -27,7 +31,9 @@ export default async function MitigationsPage() {
             Reusable mitigation &amp; remediation statements, mapped to controls and POA&Ms.
           </p>
         </div>
-        <CreateMitigation controls={controls} action={createMitigationAction} />
+        {canCreate && (
+          <CreateMitigation controls={controls} action={createMitigationAction} />
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

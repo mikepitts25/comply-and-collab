@@ -5,6 +5,8 @@ import { AtoBadge, ImpactBadge, SeverityBadge } from "@/components/badges";
 import { fmtDate, daysUntil } from "@/lib/format";
 import { generatePoamsAction } from "@/app/actions/import";
 import { frameworkLabel } from "@/lib/data/families";
+import { getSessionUser } from "@/lib/auth";
+import { can } from "@/lib/rbac";
 import { ClipboardPlus, FileText, Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +36,9 @@ export default async function SystemDetail({
     },
   });
   if (!system) notFound();
+
+  const user = await getSessionUser();
+  const canGenerate = user ? can(user.role, "poam:generate") : false;
 
   const sevCount = (s: string) => system.findings.filter((f) => f.severity === s).length;
   const d = daysUntil(system.atoExpiration);
@@ -75,13 +80,15 @@ export default async function SystemDetail({
             <Download className="h-4 w-4" />
             POA&M CSV
           </a>
-          <form action={generatePoamsAction}>
-            <input type="hidden" name="systemId" value={system.id} />
-            <button className="btn-primary" title="Create POA&Ms for open findings without one">
-              <ClipboardPlus className="h-4 w-4" />
-              Generate POA&Ms
-            </button>
-          </form>
+          {canGenerate && (
+            <form action={generatePoamsAction}>
+              <input type="hidden" name="systemId" value={system.id} />
+              <button className="btn-primary" title="Create POA&Ms for open findings without one">
+                <ClipboardPlus className="h-4 w-4" />
+                Generate POA&Ms
+              </button>
+            </form>
+          )}
         </div>
       </div>
 

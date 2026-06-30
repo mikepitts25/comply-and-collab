@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
+import { ROLE_CAPABILITIES } from "@/lib/rbac";
 import { Sidebar } from "@/components/sidebar";
 import { logoutAction } from "@/app/actions/auth";
-import { LogOut } from "lucide-react";
+import { LogOut, Eye } from "lucide-react";
 
 const ROLE_LABEL: Record<string, string> = {
   ADMIN: "Administrator",
@@ -21,13 +22,21 @@ export default async function DashLayout({
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
+  const capabilities = ROLE_CAPABILITIES[user.role] ?? [];
+  const readOnly = capabilities.length <= 1; // AUDITOR (comment only) / observers
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar capabilities={capabilities} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-ink-200 bg-white px-6 py-3 print:hidden">
-          <div className="text-sm text-ink-500">
-            On-prem deployment · IL5 enclave
+          <div className="flex items-center gap-3 text-sm text-ink-500">
+            <span>On-prem deployment · IL5 enclave</span>
+            {readOnly && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-600">
+                <Eye className="h-3 w-3" /> Read-only access
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right leading-tight">

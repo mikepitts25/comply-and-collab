@@ -69,8 +69,9 @@ async function main() {
     prisma.user.create({ data: { email: "issm@demo.mil", name: "Morgan ISSM", role: "ISSM", passwordHash: pw } }),
     prisma.user.create({ data: { email: "analyst@demo.mil", name: "Riley Analyst", role: "ANALYST", passwordHash: pw } }),
     prisma.user.create({ data: { email: "engineer@demo.mil", name: "Jordan Engineer", role: "ENGINEER", passwordHash: pw } }),
+    prisma.user.create({ data: { email: "auditor@demo.mil", name: "Casey Auditor", role: "AUDITOR", passwordHash: pw } }),
   ]);
-  console.log("  Users: admin / issm / analyst / engineer @demo.mil (pw: Password123!)");
+  console.log("  Users: admin / issm / analyst / engineer / auditor @demo.mil (pw: Password123!)");
 
   // --- System ---
   const atoDate = new Date();

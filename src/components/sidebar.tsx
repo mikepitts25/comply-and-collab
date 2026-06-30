@@ -23,11 +23,12 @@ const NAV = [
   { href: "/conmon", label: "ConMon", icon: Activity },
   { href: "/controls", label: "Controls", icon: BookCheck },
   { href: "/mitigations", label: "Mitigations", icon: FileText },
-  { href: "/import", label: "Import Scans", icon: Upload },
+  { href: "/import", label: "Import Scans", icon: Upload, requires: "scan:import" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ capabilities }: { capabilities: string[] }) {
   const path = usePathname();
+  const nav = NAV.filter((n) => !n.requires || capabilities.includes(n.requires));
   return (
     <aside className="flex w-60 shrink-0 flex-col bg-ink-950 text-ink-200 print:hidden">
       <div className="flex items-center gap-2 px-5 py-4 text-white">
@@ -38,7 +39,7 @@ export function Sidebar() {
         </div>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-2">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {nav.map(({ href, label, icon: Icon }) => {
           const active = href === "/" ? path === "/" : path.startsWith(href);
           return (
             <Link

@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireCapability } from "@/lib/rbac-server";
+import { ForbiddenError } from "@/lib/rbac";
 import { loadControls, loadCciMap } from "@/lib/data/catalog";
 
 export type CatalogLoadState = {
@@ -18,9 +19,12 @@ export type CatalogLoadState = {
  * inserted. Admin only.
  */
 export async function loadCatalogAction(): Promise<CatalogLoadState> {
-  const user = await requireUser();
-  if (user.role !== "ADMIN") {
-    return { error: "Only administrators can manage the catalog." };
+  let user;
+  try {
+    user = await requireCapability("catalog:load");
+  } catch (e) {
+    if (e instanceof ForbiddenError) return { error: e.message };
+    throw e;
   }
 
   try {
