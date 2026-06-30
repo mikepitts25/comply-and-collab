@@ -13,6 +13,7 @@ export type Capability =
   | "mitigation:approve"
   | "catalog:load"
   | "inventory:manage"
+  | "apikey:manage"
   | "comment:create";
 
 const ALL: Capability[] = [
@@ -25,6 +26,7 @@ const ALL: Capability[] = [
   "mitigation:approve",
   "catalog:load",
   "inventory:manage",
+  "apikey:manage",
   "comment:create",
 ];
 

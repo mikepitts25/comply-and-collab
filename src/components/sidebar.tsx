@@ -13,6 +13,7 @@ import {
   Upload,
   ShieldCheck,
   Activity,
+  KeyRound,
 } from "lucide-react";
 
 const NAV = [
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/controls", label: "Controls", icon: BookCheck },
   { href: "/mitigations", label: "Mitigations", icon: FileText },
   { href: "/import", label: "Import Scans", icon: Upload, requires: "scan:import" },
+  { href: "/settings/api-keys", label: "API Keys", icon: KeyRound, requires: "apikey:manage" },
 ];
 
 export function Sidebar({ capabilities }: { capabilities: string[] }) {

@@ -27,6 +27,7 @@
 - **Hardware/software inventory + PPSM** — per-system hardware list (make/model/serial/location/virtual), software inventory, and Ports/Protocols/Services Management registration (port, protocol, direction, boundary, classification, approval status) — flowing into the SSP.
 - **Exports** — eMASS-style POA&M in **XLSX** (styled workbook, frozen header, autofilter) and CSV (per-system or all systems), plus a printable System Security Plan (SSP) document with Markdown download.
 - **Continuous monitoring (ConMon)** — posture trend chart (open findings over time by severity), finding burndown, aging buckets, and scan cadence. Rescans **auto-close** remediated findings (first/last-seen reconciliation) and auto-complete fully-resolved POA&Ms.
+- **Automated ingestion API** — token-authenticated `POST /api/v1/scans` so pipelines can push ACAS/STIG/SCAP results; admin-managed API keys (hashed, revocable, run as their owning user under RBAC).
 - **Collaboration** — per-finding and per-POA&M discussion threads, assignments, and an activity feed.
 - **Role-based access control** — capability-based RBAC enforced server-side on every mutation (Admin, ISSM, ISSO, Analyst, Engineer, Auditor), with the UI hiding actions a role can't perform and a read-only banner for observers.
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
@@ -138,7 +139,7 @@ samples/                 # example ACAS/STIG files
 - ✅ Capability-based RBAC enforced on all mutations
 - ✅ Hardware/software inventory + PPSM (ports, protocols & services)
 - ✅ eMASS-style POA&M XLSX export (styled workbook)
-- Scheduled/automated scan ingestion (watch-folder or API)
+- ✅ Automated scan ingestion API (token-authenticated)
 - CAC/PIV (client-cert) authentication
 - Hardware/software inventory reconciliation and ports/protocols/services (PPSM)
 
