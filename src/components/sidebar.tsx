@@ -27,7 +27,7 @@ const NAV = [
 export function Sidebar() {
   const path = usePathname();
   return (
-    <aside className="flex w-60 shrink-0 flex-col bg-ink-950 text-ink-200">
+    <aside className="flex w-60 shrink-0 flex-col bg-ink-950 text-ink-200 print:hidden">
       <div className="flex items-center gap-2 px-5 py-4 text-white">
         <ShieldCheck className="h-6 w-6" />
         <div className="leading-tight">

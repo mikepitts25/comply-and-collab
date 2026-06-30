@@ -25,3 +25,15 @@ export const FAMILY_NAMES: Record<string, string> = {
 export function familyName(code: string): string {
   return FAMILY_NAMES[code] ?? code;
 }
+
+// Friendly labels for the Framework enum.
+export const FRAMEWORK_LABELS: Record<string, string> = {
+  RMF_800_53: "NIST RMF / 800-53",
+  STIG: "DISA STIG / SRG",
+  CMMC: "CMMC",
+  FEDRAMP: "FedRAMP",
+};
+
+export function frameworkLabel(code: string): string {
+  return FRAMEWORK_LABELS[code] ?? code.replace(/_/g, " ");
+}

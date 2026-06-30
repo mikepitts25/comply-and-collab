@@ -24,6 +24,7 @@
 - **POA&M automation** — generate POA&Ms from open findings, grouped by weakness across hosts, with severity-based remediation timelines, milestones, and control linkage.
 - **Mitigation library** — reusable, control-tagged mitigation/remediation statements attachable to POA&Ms.
 - **System / ATO management** — FIPS 199 categorization, ATO status & expiration countdown, asset inventory, and SSP control-implementation narratives.
+- **Exports** — eMASS-style POA&M CSV (per-system or all systems) and a printable System Security Plan (SSP) document with Markdown download.
 - **Collaboration** — per-finding and per-POA&M discussion threads, assignments, and an activity feed.
 - **Roles** — Admin, ISSM, ISSO, Analyst, Engineer, Auditor.
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
@@ -128,7 +129,8 @@ samples/                 # example ACAS/STIG files
 
 - ✅ Full OSCAL 800-53 Rev 5 catalog + complete DISA CCI import (with in-app admin loader)
 - ✅ SCAP / XCCDF results ingestion (SCC / OpenSCAP, ARF-aware)
-- eMASS-compatible POA&M export (CSV/XLSX) and SSP generation
+- ✅ eMASS-compatible POA&M export (CSV) and SSP generation (printable + Markdown)
+- XLSX export against the official eMASS POA&M workbook template
 - Continuous monitoring (ConMon) trends & scan scheduling
 - CAC/PIV (client-cert) authentication and full RBAC enforcement
 - Hardware/software inventory reconciliation and ports/protocols/services (PPSM)

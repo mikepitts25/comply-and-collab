@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 import { AtoBadge, ImpactBadge, SeverityBadge } from "@/components/badges";
 import { fmtDate, daysUntil } from "@/lib/format";
 import { generatePoamsAction } from "@/app/actions/import";
-import { ClipboardPlus } from "lucide-react";
+import { frameworkLabel } from "@/lib/data/families";
+import { ClipboardPlus, FileText, Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -56,13 +57,32 @@ export default async function SystemDetail({
             <p className="mt-2 max-w-2xl text-sm text-ink-500">{system.description}</p>
           )}
         </div>
-        <form action={generatePoamsAction}>
-          <input type="hidden" name="systemId" value={system.id} />
-          <button className="btn-primary" title="Create POA&Ms for open findings without one">
-            <ClipboardPlus className="h-4 w-4" />
-            Generate POA&Ms
-          </button>
-        </form>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/systems/${system.id}/ssp`}
+            className="btn-ghost"
+            title="Generate the System Security Plan document"
+          >
+            <FileText className="h-4 w-4" />
+            SSP
+          </a>
+          <a
+            href={`/api/export/poam?system=${system.id}`}
+            className="btn-ghost"
+            download
+            title="Export this system's POA&Ms as an eMASS-style CSV"
+          >
+            <Download className="h-4 w-4" />
+            POA&M CSV
+          </a>
+          <form action={generatePoamsAction}>
+            <input type="hidden" name="systemId" value={system.id} />
+            <button className="btn-primary" title="Create POA&Ms for open findings without one">
+              <ClipboardPlus className="h-4 w-4" />
+              Generate POA&Ms
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* ATO + categorization */}
@@ -109,7 +129,7 @@ export default async function SystemDetail({
         <span className="text-xs font-semibold uppercase text-ink-400">Frameworks:</span>
         {system.frameworks.map((f) => (
           <span key={f} className="rounded bg-ink-100 px-2 py-0.5 text-xs text-ink-700">
-            {f.replace(/_/g, " ")}
+            {frameworkLabel(f)}
           </span>
         ))}
       </div>
