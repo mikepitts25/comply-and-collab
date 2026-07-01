@@ -88,6 +88,14 @@ export default async function SystemDetail({
             SSP
           </a>
           <a
+            href={`/systems/${system.id}/sar`}
+            className="btn-ghost"
+            title="Generate the Security Assessment Report"
+          >
+            <FileText className="h-4 w-4" />
+            SAR
+          </a>
+          <a
             href={`/api/export/poam-xlsx?system=${system.id}`}
             className="btn-ghost"
             download
