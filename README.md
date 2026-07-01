@@ -32,6 +32,7 @@
 - **Continuous monitoring (ConMon)** — posture trend chart (open findings over time by severity), finding burndown, aging buckets, and scan cadence. Rescans **auto-close** remediated findings (first/last-seen reconciliation) and auto-complete fully-resolved POA&Ms.
 - **Automated ingestion API** — token-authenticated `POST /api/v1/scans` so pipelines can push ACAS/STIG/SCAP results; admin-managed API keys (hashed, revocable, run as their owning user under RBAC).
 - **Collaboration** — per-finding and per-POA&M discussion threads, assignments, and an activity feed.
+- **My Work** — a personal queue of findings assigned to you and POA&Ms you own (with due dates / overdue flags), plus risk acceptances awaiting your review (senior roles).
 - **Executive portfolio scorecard** — a printable cross-system risk rollup (ATO status/expiration, open findings by severity, POA&M and coverage per system) with Markdown export, for leadership reporting.
 - **Audit log** — a filterable, paginated trail of every action (imports, triage, POA&M changes, catalog loads, CAC sign-ins, API-key management) for compliance oversight.
 - **Role-based access control** — capability-based RBAC enforced server-side on every mutation (Admin, ISSM, ISSO, Analyst, Engineer, Auditor), with the UI hiding actions a role can't perform and a read-only banner for observers.
