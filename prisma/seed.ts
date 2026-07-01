@@ -190,6 +190,33 @@ async function main() {
   }
   console.log("  SSP: 4 control narratives");
 
+  // --- Common control provider + inheritance ---
+  const ecc = await prisma.system.create({
+    data: {
+      name: "Enterprise Enclave Common Controls",
+      acronym: "ECC",
+      description: "Common control provider for the on-prem enclave (physical, environmental, personnel, and awareness controls).",
+      categorization: "MODERATE",
+      isCommonControlProvider: true,
+      authorizationStatus: "ATO",
+      authorizingOfficial: "Enterprise AO",
+    },
+  });
+  const commonIds = ["PE-2", "PE-3", "PE-6", "PE-8", "AT-2", "AT-3", "AT-4", "PS-3", "PS-4", "PS-5", "PL-4", "MP-6", "CP-9"];
+  const existingCommon = (await prisma.control.findMany({ where: { id: { in: commonIds } }, select: { id: true } })).map((c) => c.id);
+  await prisma.systemControl.createMany({
+    data: existingCommon.map((id) => ({ systemId: ecc.id, controlId: id, status: "IMPLEMENTED" as const, narrative: `Provided as a common control by ${ecc.acronym}.` })),
+    skipDuplicates: true,
+  });
+  const mdpBaseHigh = new Set((await prisma.control.findMany({ where: { AND: [{ baselineHigh: true }, { id: { in: existingCommon } }] }, select: { id: true } })).map((c) => c.id));
+  const mdpDocumented = new Set((await prisma.systemControl.findMany({ where: { systemId: system.id }, select: { controlId: true } })).map((s) => s.controlId));
+  const inherit = [...mdpBaseHigh].filter((id) => !mdpDocumented.has(id));
+  await prisma.systemControl.createMany({
+    data: inherit.map((id) => ({ systemId: system.id, controlId: id, status: "INHERITED" as const, inheritedFrom: ecc.acronym, narrative: `Inherited from common control provider ${ecc.acronym}.` })),
+    skipDuplicates: true,
+  });
+  console.log(`  Common controls: ${ecc.acronym} provides ${existingCommon.length}; ${system.acronym} inherited ${inherit.length}`);
+
   // --- Hardware / software inventory + PPSM ---
   const assets = await prisma.asset.findMany({ where: { systemId: system.id } });
   const hw: Record<string, { manufacturer: string; model: string; location: string; virtual: boolean }> = {

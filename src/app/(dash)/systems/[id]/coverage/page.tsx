@@ -5,6 +5,8 @@ import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
 import { familyName } from "@/lib/data/families";
 import { documentControlAction, createControlPoamAction } from "@/app/actions/controls";
+import { inheritControlsAction } from "@/app/actions/inheritance";
+import { prisma } from "@/lib/db";
 import type { ControlStatus } from "@prisma/client";
 
 const IMPLEMENTED = ["IMPLEMENTED", "INHERITED", "NOT_APPLICABLE"];
@@ -48,6 +50,13 @@ export default async function CoveragePage({
   const canDoc = user ? can(user.role, "control:document") : false;
   const canPoam = user ? can(user.role, "poam:generate") : false;
 
+  const providers = data.system.isCommonControlProvider
+    ? []
+    : await prisma.system.findMany({
+        where: { isCommonControlProvider: true, id: { not: data.system.id } },
+        select: { id: true, acronym: true, name: true },
+      });
+
   const familyControls = family ? await gatherFamilyControls(id, family) : [];
   const pct = (n: number) =>
     data.totals.baseline ? Math.round((n / data.totals.baseline) * 100) : 0;
@@ -85,6 +94,26 @@ export default async function CoveragePage({
           <div className="h-4 bg-blue-400" style={{ width: `${pct(data.totals.documented - data.totals.implemented)}%` }} />
         </div>
       </div>
+
+      {/* Common control inheritance */}
+      {canDoc && providers.length > 0 && (
+        <div className="card p-5">
+          <h2 className="mb-1 text-sm font-semibold text-ink-700">Common control inheritance</h2>
+          <p className="mb-3 text-xs text-ink-500">
+            Inherit implemented controls from a common control provider (enclave /
+            hosting environment) into this system's baseline.
+          </p>
+          <form action={inheritControlsAction} className="flex flex-wrap items-end gap-2">
+            <input type="hidden" name="systemId" value={data.system.id} />
+            <select name="providerId" className="input w-72" defaultValue={providers[0]?.id}>
+              {providers.map((p) => (
+                <option key={p.id} value={p.id}>{p.acronym} — {p.name}</option>
+              ))}
+            </select>
+            <button className="btn-primary">Inherit implemented controls</button>
+          </form>
+        </div>
+      )}
 
       {/* Per-family coverage */}
       <div className="card overflow-hidden">

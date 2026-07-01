@@ -113,6 +113,10 @@ model System {
   atoExpiration       DateTime?
   authorizingOfficial String?
 
+  // A common control provider (e.g. an enclave / hosting environment) offers
+  // its implemented controls for inheritance by subscribing systems.
+  isCommonControlProvider Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
