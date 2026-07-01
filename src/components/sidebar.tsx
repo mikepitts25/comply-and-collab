@@ -15,6 +15,7 @@ import {
   Activity,
   KeyRound,
   ScrollText,
+  BarChart3,
 } from "lucide-react";
 
 const NAV = [
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/findings", label: "Findings", icon: ShieldAlert },
   { href: "/poams", label: "POA&Ms", icon: ClipboardList },
   { href: "/conmon", label: "ConMon", icon: Activity },
+  { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/controls", label: "Controls", icon: BookCheck },
   { href: "/mitigations", label: "Mitigations", icon: FileText },
   { href: "/audit", label: "Audit Log", icon: ScrollText },
