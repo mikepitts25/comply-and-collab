@@ -74,10 +74,12 @@ async function main() {
   console.log("  Users: admin / issm / analyst / engineer / auditor @demo.mil (pw: Password123!)");
 
   // --- System ---
-  const atoDate = new Date();
-  atoDate.setMonth(atoDate.getMonth() - 9);
-  const atoExpiration = new Date(atoDate);
-  atoExpiration.setFullYear(atoExpiration.getFullYear() + 3);
+  // A 3-year ATO nearing reauthorization (expires ~70 days out) so the
+  // expiration warnings and the dashboard attention panel are meaningful.
+  const atoExpiration = new Date();
+  atoExpiration.setDate(atoExpiration.getDate() + 70);
+  const atoDate = new Date(atoExpiration);
+  atoDate.setFullYear(atoDate.getFullYear() - 3);
 
   const system = await prisma.system.create({
     data: {
