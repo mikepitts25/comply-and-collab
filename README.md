@@ -26,7 +26,7 @@
 - **System / ATO management** — FIPS 199 categorization, ATO status & expiration countdown, asset inventory, and SSP control-implementation narratives.
 - **Baseline control coverage & gap analysis** — for a system's categorization (Low/Mod/High), computes 800-53 baseline coverage: documented vs implemented per family, with drill-down and inline SSP narrative authoring to close gaps.
 - **Hardware/software inventory + PPSM** — per-system hardware list (make/model/serial/location/virtual), software inventory, and Ports/Protocols/Services Management registration (port, protocol, direction, boundary, classification, approval status) — flowing into the SSP.
-- **Exports** — eMASS-style POA&M in **XLSX** (styled workbook, frozen header, autofilter) and CSV (per-system or all systems), plus a printable System Security Plan (SSP) document with Markdown download.
+- **Exports** — eMASS-style POA&M in **XLSX** (styled workbook, frozen header, autofilter) and CSV; a hardware/software/PPSM **inventory workbook** (3 sheets); and a printable System Security Plan (SSP) with Markdown download.
 - **Continuous monitoring (ConMon)** — posture trend chart (open findings over time by severity), finding burndown, aging buckets, and scan cadence. Rescans **auto-close** remediated findings (first/last-seen reconciliation) and auto-complete fully-resolved POA&Ms.
 - **Automated ingestion API** — token-authenticated `POST /api/v1/scans` so pipelines can push ACAS/STIG/SCAP results; admin-managed API keys (hashed, revocable, run as their owning user under RBAC).
 - **Collaboration** — per-finding and per-POA&M discussion threads, assignments, and an activity feed.

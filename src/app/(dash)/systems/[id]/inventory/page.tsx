@@ -10,7 +10,7 @@ import {
   addPpsmAction,
   deletePpsmAction,
 } from "@/app/actions/inventory";
-import { Trash2 } from "lucide-react";
+import { Trash2, Download } from "lucide-react";
 import type { SoftwareType, Protocol, FlowDirection, PpsmStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -54,12 +54,19 @@ export default async function InventoryPage({
         <Link href={`/systems/${system.id}`} className="text-sm text-ink-500 hover:underline">
           ← Back to {system.acronym}
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold text-ink-900">
-          Inventory — {system.acronym}
-        </h1>
-        <p className="text-sm text-ink-500">
-          Hardware, software, and PPSM (ports, protocols &amp; services) for the ATO package.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="mt-1 text-2xl font-semibold text-ink-900">
+              Inventory — {system.acronym}
+            </h1>
+            <p className="text-sm text-ink-500">
+              Hardware, software, and PPSM (ports, protocols &amp; services) for the ATO package.
+            </p>
+          </div>
+          <a href={`/api/export/inventory-xlsx?system=${system.id}`} className="btn-ghost" download>
+            <Download className="h-4 w-4" /> Export XLSX
+          </a>
+        </div>
       </div>
 
       {/* Hardware */}
