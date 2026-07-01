@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Activity,
   KeyRound,
+  ScrollText,
 } from "lucide-react";
 
 const NAV = [
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/conmon", label: "ConMon", icon: Activity },
   { href: "/controls", label: "Controls", icon: BookCheck },
   { href: "/mitigations", label: "Mitigations", icon: FileText },
+  { href: "/audit", label: "Audit Log", icon: ScrollText },
   { href: "/import", label: "Import Scans", icon: Upload, requires: "scan:import" },
   { href: "/settings/api-keys", label: "API Keys", icon: KeyRound, requires: "apikey:manage" },
 ];
