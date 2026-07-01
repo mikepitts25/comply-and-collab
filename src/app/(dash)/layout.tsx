@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { ROLE_CAPABILITIES } from "@/lib/rbac";
@@ -39,12 +40,12 @@ export default async function DashLayout({
             )}
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right leading-tight">
+            <Link href="/account" className="rounded-md px-2 py-1 text-right leading-tight hover:bg-ink-50" title="My account">
               <div className="text-sm font-medium text-ink-900">{user.name}</div>
               <div className="text-xs text-ink-500">
                 {ROLE_LABEL[user.role] ?? user.role}
               </div>
-            </div>
+            </Link>
             <form action={logoutAction}>
               <button className="btn-ghost" title="Sign out">
                 <LogOut className="h-4 w-4" />
