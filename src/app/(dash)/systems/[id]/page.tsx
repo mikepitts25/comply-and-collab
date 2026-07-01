@@ -79,6 +79,14 @@ export default async function SystemDetail({
             Coverage
           </a>
           <a
+            href={`/systems/${system.id}/cmmc`}
+            className="btn-ghost"
+            title="CMMC 2.0 / NIST 800-171 assessment"
+          >
+            <BookCheck className="h-4 w-4" />
+            CMMC
+          </a>
+          <a
             href={`/systems/${system.id}/inventory`}
             className="btn-ghost"
             title="Hardware, software, and PPSM inventory"
@@ -194,6 +202,7 @@ export default async function SystemDetail({
               <th className="th">OS</th>
               <th className="th">Type</th>
               <th className="th">Findings</th>
+              <th className="th">Checklist</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-ink-100">
@@ -204,10 +213,27 @@ export default async function SystemDetail({
                 <td className="td text-xs">{a.osName ?? "—"}</td>
                 <td className="td text-xs">{a.type}</td>
                 <td className="td">{a._count.findings}</td>
+                <td className="td text-xs">
+                  <a
+                    href={`/api/export/checklist?asset=${a.id}&format=ckl`}
+                    className="text-ink-600 hover:text-ink-900 hover:underline"
+                    title="Export STIG statuses as a DISA .ckl (STIG Viewer 2.x)"
+                  >
+                    .ckl
+                  </a>
+                  <span className="text-ink-300"> · </span>
+                  <a
+                    href={`/api/export/checklist?asset=${a.id}&format=cklb`}
+                    className="text-ink-600 hover:text-ink-900 hover:underline"
+                    title="Export STIG statuses as a .cklb (STIG Viewer 3)"
+                  >
+                    .cklb
+                  </a>
+                </td>
               </tr>
             ))}
             {system.assets.length === 0 && (
-              <tr><td className="td text-ink-500" colSpan={5}>No assets discovered yet.</td></tr>
+              <tr><td className="td text-ink-500" colSpan={6}>No assets discovered yet.</td></tr>
             )}
           </tbody>
         </table>
