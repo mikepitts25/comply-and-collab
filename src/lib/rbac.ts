@@ -17,6 +17,7 @@ export type Capability =
   | "control:document"
   | "risk:accept"
   | "system:manage"
+  | "user:manage"
   | "comment:create";
 
 const ALL: Capability[] = [
@@ -33,6 +34,7 @@ const ALL: Capability[] = [
   "control:document",
   "risk:accept",
   "system:manage",
+  "user:manage",
   "comment:create",
 ];
 
