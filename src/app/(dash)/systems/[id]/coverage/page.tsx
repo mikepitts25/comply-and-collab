@@ -4,8 +4,10 @@ import { gatherCoverage, gatherFamilyControls } from "@/lib/coverage";
 import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
 import { familyName } from "@/lib/data/families";
-import { documentControlAction } from "@/app/actions/controls";
+import { documentControlAction, createControlPoamAction } from "@/app/actions/controls";
 import type { ControlStatus } from "@prisma/client";
+
+const IMPLEMENTED = ["IMPLEMENTED", "INHERITED", "NOT_APPLICABLE"];
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +46,7 @@ export default async function CoveragePage({
   if (!data) notFound();
   const user = await getSessionUser();
   const canDoc = user ? can(user.role, "control:document") : false;
+  const canPoam = user ? can(user.role, "poam:generate") : false;
 
   const familyControls = family ? await gatherFamilyControls(id, family) : [];
   const pct = (n: number) =>
@@ -141,6 +144,7 @@ export default async function CoveragePage({
                 <th className="th">Control</th><th className="th">Status</th>
                 <th className="th">Implementation narrative</th>
                 {canDoc && <th className="th">Document</th>}
+                {canPoam && <th className="th">Gap POA&M</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-100">
@@ -165,6 +169,21 @@ export default async function CoveragePage({
                         <textarea name="narrative" defaultValue={c.narrative ?? ""} rows={1} placeholder="Narrative…" className="input w-48 py-1 text-xs" />
                         <button className="btn-primary px-2 py-1 text-xs">Save</button>
                       </form>
+                    </td>
+                  )}
+                  {canPoam && (
+                    <td className="td">
+                      {!IMPLEMENTED.includes(c.status ?? "") ? (
+                        <form action={createControlPoamAction}>
+                          <input type="hidden" name="systemId" value={data.system.id} />
+                          <input type="hidden" name="controlId" value={c.id} />
+                          <button className="whitespace-nowrap text-xs font-medium text-blue-700 hover:underline">
+                            + POA&amp;M
+                          </button>
+                        </form>
+                      ) : (
+                        <span className="text-xs text-ink-300">—</span>
+                      )}
                     </td>
                   )}
                 </tr>
