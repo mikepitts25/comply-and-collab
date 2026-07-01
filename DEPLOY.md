@@ -111,6 +111,39 @@ the bundled dataset in-app from **Controls → Load catalog bundle**.
 
 ---
 
+## Backup & restore
+
+All persistent state lives in PostgreSQL (the `db-data` volume for the Compose
+stack). Uploaded scans are parsed into the database, not stored on disk, so a
+database backup is a complete backup.
+
+**Back up** (writes a compressed dump to the host):
+
+```bash
+# Docker Compose stack
+docker compose exec -T db pg_dump -U comply -Fc comply > comply-$(date +%Y%m%d).dump
+
+# Or against an external database
+pg_dump "$DATABASE_URL" -Fc > comply-$(date +%Y%m%d).dump
+```
+
+**Restore** into a fresh, empty database:
+
+```bash
+# Compose: recreate an empty db first if needed (docker compose down -v && up)
+docker compose exec -T db pg_restore -U comply -d comply --clean --if-exists < comply-YYYYMMDD.dump
+
+# External database
+pg_restore -d "$DATABASE_URL" --clean --if-exists comply-YYYYMMDD.dump
+```
+
+Schema migrations are applied automatically on the next app boot
+(`prisma migrate deploy`), so restore the data first, then start the app.
+Schedule `pg_dump` via cron/systemd-timer and keep dumps off-host. Test restores
+periodically.
+
+---
+
 ## Air-gapped notes
 
 - **Runtime** makes no outbound calls; the container image carries the Prisma
