@@ -16,10 +16,12 @@ import {
   KeyRound,
   ScrollText,
   BarChart3,
+  CircleUser,
 } from "lucide-react";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/my-work", label: "My Work", icon: CircleUser },
   { href: "/systems", label: "Systems", icon: Server },
   { href: "/findings", label: "Findings", icon: ShieldAlert },
   { href: "/poams", label: "POA&Ms", icon: ClipboardList },
