@@ -270,6 +270,56 @@ async function main() {
   }
   console.log(`  ConMon: ${weeks} weeks of posture history`);
 
+  // ==========================================================================
+  // Second system (MODERATE baseline, ATO with conditions) to exercise the
+  // cross-system dashboard, ConMon, and coverage at a different baseline.
+  // ==========================================================================
+  const lssExpiration = new Date();
+  lssExpiration.setMonth(lssExpiration.getMonth() + 14);
+  const lssAtoDate = new Date(lssExpiration);
+  lssAtoDate.setFullYear(lssAtoDate.getFullYear() - 3);
+
+  const lss = await prisma.system.create({
+    data: {
+      name: "Logistics Support System",
+      acronym: "LSS",
+      description: "Supply and logistics tracking system. Hosted in an on-prem IL4 enclave.",
+      confidentiality: "MODERATE",
+      integrity: "MODERATE",
+      availability: "LOW",
+      categorization: "MODERATE",
+      frameworks: ["RMF_800_53", "STIG", "CMMC"],
+      authorizationStatus: "ATO_WITH_CONDITIONS",
+      atoDate: lssAtoDate,
+      atoExpiration: lssExpiration,
+      authorizingOfficial: "Ms. D. Rivera (AO)",
+    },
+  });
+  for (const name of ["acas-scan.nessus", "windows-app01.cklb"]) {
+    const content = readFileSync(join(SAMPLES, name), "utf8");
+    await ingestScan({ systemId: lss.id, userId: issm.id, filename: name, content });
+  }
+  const lssGen = await generatePoams(lss.id, issm.id);
+  await prisma.systemControl.create({
+    data: { systemId: lss.id, controlId: "AC-2", status: "IMPLEMENTED", narrative: "Accounts managed via centralized IdAM with quarterly reviews." },
+  });
+  await prisma.ppsmEntry.create({
+    data: { systemId: lss.id, port: "443", protocol: "TCP", service: "HTTPS", direction: "INBOUND", boundary: "Enclave / IL4 boundary", classification: "CUI", status: "APPROVED", justification: "User access to the logistics web UI." },
+  });
+  // A short posture history for LSS.
+  const lssOpen = await prisma.finding.groupBy({ by: ["severity"], where: { systemId: lss.id, status: "OPEN" }, _count: true });
+  const lc = (s: string) => lssOpen.find((g) => g.severity === s)?._count ?? 0;
+  for (let w = 6; w >= 1; w--) {
+    const takenAt = new Date();
+    takenAt.setDate(takenAt.getDate() - w * 7);
+    const f = 1 + w / 4;
+    const oc = Math.round(lc("CRITICAL") * f), oh = Math.round(lc("HIGH") * f), om = Math.round(lc("MEDIUM") * f), ol = Math.round(lc("LOW") * f);
+    await prisma.postureSnapshot.create({
+      data: { systemId: lss.id, takenAt, openCritical: oc, openHigh: oh, openMedium: om, openLow: ol, totalOpen: oc + oh + om + ol, closedTotal: (6 - w) },
+    });
+  }
+  console.log(`  System 2: ${lss.name} (${lss.acronym}) — ${lssGen.created} POA&Ms, MODERATE baseline`);
+
   console.log("Seed complete.");
 }
 
