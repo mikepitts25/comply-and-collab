@@ -6,7 +6,7 @@ import {
   AtoBadge,
   PoamStatusBadge,
 } from "@/components/badges";
-import { ShieldAlert, Server, ClipboardList, CalendarClock } from "lucide-react";
+import { ShieldAlert, Server, ClipboardList, CalendarClock, AlertTriangle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +44,29 @@ export default async function Dashboard() {
     include: { system: true },
   });
 
+  // Attention-required rollup across all systems.
+  const now = new Date();
+  const in90 = new Date(now);
+  in90.setDate(in90.getDate() + 90);
+  const aged90 = new Date(now);
+  aged90.setDate(aged90.getDate() - 90);
+  const [atoExpiring, overduePoams, agedFindings, pendingPpsm] = await Promise.all([
+    prisma.system.count({
+      where: { authorizationStatus: { in: ["ATO", "ATO_WITH_CONDITIONS", "IATT"] }, atoExpiration: { lte: in90 } },
+    }),
+    prisma.poam.count({
+      where: { status: { in: ["OPEN", "ONGOING", "DRAFT"] }, scheduledCompletion: { lt: now } },
+    }),
+    prisma.finding.count({ where: { status: "OPEN", firstSeen: { lt: aged90 } } }),
+    prisma.ppsmEntry.count({ where: { status: "PENDING" } }),
+  ]);
+  const attention = [
+    { n: atoExpiring, label: "ATOs expiring within 90 days", href: "/systems" },
+    { n: overduePoams, label: "POA&Ms past their scheduled completion", href: "/poams" },
+    { n: agedFindings, label: "Open findings aged over 90 days", href: "/findings" },
+    { n: pendingPpsm, label: "PPSM entries pending approval", href: "/systems" },
+  ].filter((a) => a.n > 0);
+
   return (
     <div className="space-y-6">
       <div>
@@ -52,6 +75,29 @@ export default async function Dashboard() {
           Cross-system posture across RMF, STIG, and ACAS sources.
         </p>
       </div>
+
+      {/* Attention required */}
+      {attention.length > 0 && (
+        <div className="card border-amber-200 bg-amber-50 p-5">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-800">
+            <AlertTriangle className="h-4 w-4" /> Attention required
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {attention.map((a) => (
+              <Link
+                key={a.label}
+                href={a.href}
+                className="flex items-center gap-3 rounded-md bg-white/70 px-3 py-2 hover:bg-white"
+              >
+                <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-amber-600 px-2 text-sm font-semibold text-white">
+                  {a.n}
+                </span>
+                <span className="text-sm text-ink-800">{a.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
