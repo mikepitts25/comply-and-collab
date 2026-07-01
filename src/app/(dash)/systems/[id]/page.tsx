@@ -7,7 +7,7 @@ import { generatePoamsAction } from "@/app/actions/import";
 import { frameworkLabel } from "@/lib/data/families";
 import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
-import { ClipboardPlus, FileText, Download, Boxes, BookCheck } from "lucide-react";
+import { ClipboardPlus, FileText, Download, Boxes, BookCheck, Pencil } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +39,7 @@ export default async function SystemDetail({
 
   const user = await getSessionUser();
   const canGenerate = user ? can(user.role, "poam:generate") : false;
+  const canManage = user ? can(user.role, "system:manage") : false;
 
   const sevCount = (s: string) => system.findings.filter((f) => f.severity === s).length;
   const d = daysUntil(system.atoExpiration);
@@ -63,6 +64,12 @@ export default async function SystemDetail({
           )}
         </div>
         <div className="flex items-center gap-2">
+          {canManage && (
+            <a href={`/systems/${system.id}/edit`} className="btn-ghost" title="Edit system attributes">
+              <Pencil className="h-4 w-4" />
+              Edit
+            </a>
+          )}
           <a
             href={`/systems/${system.id}/coverage`}
             className="btn-ghost"

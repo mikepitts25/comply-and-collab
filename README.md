@@ -24,7 +24,7 @@
 - **POA&M automation** — generate POA&Ms from open findings, grouped by weakness across hosts, with severity-based remediation timelines, milestones, and control linkage.
 - **Risk acceptance / waiver** — formal AO risk acceptance on a POA&M (rationale, residual risk, review date), restricted to ISSM/Admin; review-due dates surface on the dashboard.
 - **Mitigation library** — reusable, control-tagged mitigation/remediation statements attachable to POA&Ms.
-- **System / ATO management** — FIPS 199 categorization, ATO status & expiration countdown, asset inventory, and SSP control-implementation narratives.
+- **System / ATO management** — create and edit systems in-app (ISSM/Admin), with FIPS 199 categorization (auto high-water mark of C/I/A), ATO status & expiration countdown, asset inventory, and SSP control-implementation narratives.
 - **Baseline control coverage & gap analysis** — for a system's categorization (Low/Mod/High), computes 800-53 baseline coverage: documented vs implemented per family, with drill-down and inline SSP narrative authoring to close gaps.
 - **Common control inheritance** — designate a system as a common control provider (enclave/hosting environment); subscribing systems inherit its implemented controls (counted toward coverage, marked INHERITED with provenance).
 - **Hardware/software inventory + PPSM** — per-system hardware list (make/model/serial/location/virtual), software inventory, and Ports/Protocols/Services Management registration (port, protocol, direction, boundary, classification, approval status) — flowing into the SSP.

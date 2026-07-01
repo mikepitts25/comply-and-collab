@@ -40,6 +40,13 @@ describe("RBAC capability matrix", () => {
     expect(can("ENGINEER", "risk:accept")).toBe(false);
   });
 
+  it("system management is limited to ISSM and ADMIN", () => {
+    expect(can("ADMIN", "system:manage")).toBe(true);
+    expect(can("ISSM", "system:manage")).toBe(true);
+    expect(can("ANALYST", "system:manage")).toBe(false);
+    expect(can("AUDITOR", "system:manage")).toBe(false);
+  });
+
   it("every role's capabilities are a subset of ADMIN's", () => {
     const admin = new Set(ROLE_CAPABILITIES.ADMIN);
     for (const [role, caps] of Object.entries(ROLE_CAPABILITIES)) {

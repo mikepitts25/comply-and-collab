@@ -1,26 +1,36 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { getSessionUser } from "@/lib/auth";
+import { can } from "@/lib/rbac";
 import { AtoBadge, ImpactBadge } from "@/components/badges";
 import { fmtDate, daysUntil } from "@/lib/format";
+import { NewSystem } from "./new-system";
 
 export const dynamic = "force-dynamic";
 
 export default async function SystemsPage() {
-  const systems = await prisma.system.findMany({
-    orderBy: { acronym: "asc" },
-    include: {
-      _count: { select: { assets: true, findings: true, poams: true } },
-      findings: { where: { status: "OPEN" }, select: { severity: true } },
-    },
-  });
+  const [systems, user] = await Promise.all([
+    prisma.system.findMany({
+      orderBy: { acronym: "asc" },
+      include: {
+        _count: { select: { assets: true, findings: true, poams: true } },
+        findings: { where: { status: "OPEN" }, select: { severity: true } },
+      },
+    }),
+    getSessionUser(),
+  ]);
+  const canManage = user ? can(user.role, "system:manage") : false;
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink-900">Systems</h1>
-        <p className="text-sm text-ink-500">
-          Authorization boundaries and their compliance posture.
-        </p>
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-ink-900">Systems</h1>
+          <p className="text-sm text-ink-500">
+            Authorization boundaries and their compliance posture.
+          </p>
+        </div>
+        {canManage && <NewSystem />}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
