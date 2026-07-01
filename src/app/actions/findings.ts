@@ -26,6 +26,39 @@ export async function addCommentAction(formData: FormData): Promise<void> {
   revalidatePath(`/findings/${findingId}`);
 }
 
+/** Apply a status and/or assignee to many findings at once. */
+export async function bulkUpdateFindingsAction(formData: FormData): Promise<void> {
+  const user = await requireCapability("finding:update");
+  const ids = formData.getAll("findingIds").map(String).filter(Boolean);
+  if (ids.length === 0) return;
+
+  const status = String(formData.get("status") || ""); // "" = leave unchanged
+  const assignee = String(formData.get("assigneeId") || "__keep__");
+
+  const data: { status?: FindingStatus; assigneeId?: string | null; closedAt?: Date | null } = {};
+  if (status) {
+    data.status = status as FindingStatus;
+    if (status === "CLOSED") data.closedAt = new Date();
+    else if (status === "OPEN") data.closedAt = null;
+  }
+  if (assignee !== "__keep__") data.assigneeId = assignee || null;
+  if (Object.keys(data).length === 0) return;
+
+  const res = await prisma.finding.updateMany({ where: { id: { in: ids } }, data });
+  await prisma.activity.create({
+    data: {
+      actorId: user.id,
+      verb: "bulk updated",
+      entity: "Finding",
+      summary:
+        `Bulk updated ${res.count} finding(s)` +
+        (data.status ? ` → ${(data.status as string).replace(/_/g, " ")}` : "") +
+        (assignee !== "__keep__" ? ` (assignee changed)` : "") + ".",
+    },
+  });
+  revalidatePath("/findings");
+}
+
 export async function updateFindingAction(formData: FormData): Promise<void> {
   const user = await requireCapability("finding:update");
   const findingId = String(formData.get("findingId"));

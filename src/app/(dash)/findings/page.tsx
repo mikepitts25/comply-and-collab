@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { getSessionUser } from "@/lib/auth";
+import { can } from "@/lib/rbac";
 import { SeverityBadge, FindingStatusBadge } from "@/components/badges";
 import { fmtDate } from "@/lib/format";
+import { BulkBar } from "./bulk-bar";
 import type { Prisma, Severity, FindingStatus, FindingSource } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +49,12 @@ export default async function FindingsPage({
     prisma.finding.count({ where }),
   ]);
 
+  const sessionUser = await getSessionUser();
+  const canUpdate = sessionUser ? can(sessionUser.role, "finding:update") : false;
+  const users = canUpdate
+    ? await prisma.user.findMany({ where: { active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, role: true } })
+    : [];
+
   const buildQuery = (overrides: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
     const merged = { severity: sev, status, source, system: systemId, ...overrides };
@@ -72,10 +81,12 @@ export default async function FindingsPage({
         <FilterGroup label="Source" current={source ?? "ALL"} options={["ALL", ...SOURCES]} param="source" build={buildQuery} />
       </div>
 
+      <BulkBar users={users} enabled={canUpdate}>
       <div className="card overflow-hidden">
         <table className="w-full">
           <thead className="border-b border-ink-200 bg-ink-50">
             <tr>
+              {canUpdate && <th className="th w-8" />}
               <th className="th">Severity</th>
               <th className="th">Finding</th>
               <th className="th">Source</th>
@@ -90,6 +101,9 @@ export default async function FindingsPage({
           <tbody className="divide-y divide-ink-100">
             {findings.map((f) => (
               <tr key={f.id} className="hover:bg-ink-50">
+                {canUpdate && (
+                  <td className="td"><input type="checkbox" name="findingIds" value={f.id} className="h-4 w-4" /></td>
+                )}
                 <td className="td"><SeverityBadge value={f.severity} /></td>
                 <td className="td max-w-md">
                   <Link href={`/findings/${f.id}`} className="font-medium text-ink-900 hover:underline">
@@ -120,7 +134,7 @@ export default async function FindingsPage({
             ))}
             {findings.length === 0 && (
               <tr>
-                <td className="td text-ink-500" colSpan={9}>
+                <td className="td text-ink-500" colSpan={canUpdate ? 10 : 9}>
                   No findings match these filters.
                 </td>
               </tr>
@@ -128,6 +142,7 @@ export default async function FindingsPage({
           </tbody>
         </table>
       </div>
+      </BulkBar>
     </div>
   );
 }

@@ -20,7 +20,7 @@
 
 - **Scan ingestion pipeline** — ACAS `.nessus`, STIG `.ckl` (XML) / `.cklb` (JSON), and SCAP/XCCDF `.xml` (SCC, OpenSCAP; ARF-aware). De-duplicated across scans by rule/plugin per asset (first-seen / last-seen tracking).
 - **Automatic control correlation** — STIG findings map to 800-53 via their CCIs; ACAS findings fall back to flaw-remediation controls (SI-2 / RA-5).
-- **Unified findings view** — one table across sources with severity (CAT I/II/III ↔ Critical/High/Med/Low), status, asset, mapped controls, assignee, and filters.
+- **Unified findings view** — one table across sources with severity (CAT I/II/III ↔ Critical/High/Med/Low), status, asset, mapped controls, assignee, and filters, plus **bulk triage** (select many → set status / assignee at once).
 - **POA&M automation** — generate POA&Ms from open findings, grouped by weakness across hosts, with severity-based remediation timelines, milestones, and control linkage.
 - **Risk acceptance / waiver** — formal AO risk acceptance on a POA&M (rationale, residual risk, review date), restricted to ISSM/Admin; review-due dates surface on the dashboard.
 - **Mitigation library** — reusable, control-tagged mitigation/remediation statements attachable to POA&Ms.
