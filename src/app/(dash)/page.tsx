@@ -50,7 +50,9 @@ export default async function Dashboard() {
   in90.setDate(in90.getDate() + 90);
   const aged90 = new Date(now);
   aged90.setDate(aged90.getDate() - 90);
-  const [atoExpiring, overduePoams, agedFindings, pendingPpsm] = await Promise.all([
+  const in30 = new Date(now);
+  in30.setDate(in30.getDate() + 30);
+  const [atoExpiring, overduePoams, agedFindings, pendingPpsm, riskReviews] = await Promise.all([
     prisma.system.count({
       where: { authorizationStatus: { in: ["ATO", "ATO_WITH_CONDITIONS", "IATT"] }, atoExpiration: { lte: in90 } },
     }),
@@ -59,12 +61,14 @@ export default async function Dashboard() {
     }),
     prisma.finding.count({ where: { status: "OPEN", firstSeen: { lt: aged90 } } }),
     prisma.ppsmEntry.count({ where: { status: "PENDING" } }),
+    prisma.riskAcceptance.count({ where: { reviewBy: { lte: in30 } } }),
   ]);
   const attention = [
     { n: atoExpiring, label: "ATOs expiring within 90 days", href: "/systems" },
     { n: overduePoams, label: "POA&Ms past their scheduled completion", href: "/poams" },
     { n: agedFindings, label: "Open findings aged over 90 days", href: "/findings" },
     { n: pendingPpsm, label: "PPSM entries pending approval", href: "/systems" },
+    { n: riskReviews, label: "Risk acceptances due for review", href: "/poams" },
   ].filter((a) => a.n > 0);
 
   return (

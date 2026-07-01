@@ -11,6 +11,7 @@ import {
 } from "@/app/actions/poams";
 import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
+import { acceptRiskAction, revokeRiskAcceptanceAction } from "@/app/actions/risk";
 import { CheckCircle2, Circle } from "lucide-react";
 import type { PoamStatus } from "@prisma/client";
 
@@ -35,6 +36,7 @@ export default async function PoamDetail({
         findings: { include: { asset: true } },
         mitigations: true,
         comments: { include: { author: true }, orderBy: { createdAt: "asc" } },
+        riskAcceptance: { include: { acceptedBy: true } },
       },
     }),
     prisma.user.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
@@ -46,6 +48,7 @@ export default async function PoamDetail({
   const canUpdate = sessionUser ? can(sessionUser.role, "poam:update") : false;
   const canMilestone = sessionUser ? can(sessionUser.role, "poam:milestone") : false;
   const canComment = sessionUser ? can(sessionUser.role, "comment:create") : false;
+  const canAccept = sessionUser ? can(sessionUser.role, "risk:accept") : false;
 
   return (
     <div className="space-y-5">
@@ -223,6 +226,57 @@ export default async function PoamDetail({
               <button className="btn-primary w-full">Save</button>
             </form>
           </div>
+          )}
+
+          {/* Risk acceptance / waiver */}
+          {(poam.riskAcceptance || canAccept) && (
+            <div className="card p-5">
+              <h2 className="mb-3 text-sm font-semibold text-ink-700">Risk acceptance</h2>
+              {poam.riskAcceptance ? (
+                <div className="space-y-2 text-sm">
+                  <div className="rounded-md bg-purple-50 p-3 text-purple-800 ring-1 ring-purple-200">
+                    <div className="text-xs font-semibold uppercase tracking-wide">Risk accepted</div>
+                    <div className="mt-1 whitespace-pre-wrap text-sm">{poam.riskAcceptance.rationale}</div>
+                  </div>
+                  <Row label="Authorizing Official">{poam.riskAcceptance.authorizingOfficial}</Row>
+                  <Row label="Residual risk"><ImpactBadge value={poam.riskAcceptance.residualRisk} /></Row>
+                  <Row label="Accepted by">{poam.riskAcceptance.acceptedBy.name}</Row>
+                  <Row label="Accepted">{fmtDate(poam.riskAcceptance.acceptedAt)}</Row>
+                  <Row label="Review by">{fmtDate(poam.riskAcceptance.reviewBy)}</Row>
+                  {canAccept && (
+                    <form action={revokeRiskAcceptanceAction} className="pt-2">
+                      <input type="hidden" name="poamId" value={poam.id} />
+                      <button className="text-xs text-red-600 hover:underline">Rescind acceptance</button>
+                    </form>
+                  )}
+                </div>
+              ) : (
+                <form action={acceptRiskAction} className="space-y-3">
+                  <input type="hidden" name="poamId" value={poam.id} />
+                  <div>
+                    <label className="label">Authorizing Official</label>
+                    <input name="authorizingOfficial" className="input" placeholder="AO name" required />
+                  </div>
+                  <div>
+                    <label className="label">Residual risk</label>
+                    <select name="residualRisk" defaultValue="MODERATE" className="input">
+                      <option value="LOW">Low</option>
+                      <option value="MODERATE">Moderate</option>
+                      <option value="HIGH">High</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Review by</label>
+                    <input type="date" name="reviewBy" className="input" />
+                  </div>
+                  <div>
+                    <label className="label">Rationale</label>
+                    <textarea name="rationale" rows={3} className="input" placeholder="Basis for accepting this risk…" required />
+                  </div>
+                  <button className="btn-primary w-full">Accept risk</button>
+                </form>
+              )}
+            </div>
           )}
 
           <div className="card p-5 text-sm">
