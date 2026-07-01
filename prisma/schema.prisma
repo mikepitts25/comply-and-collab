@@ -44,6 +44,7 @@ model User {
   activities           Activity[]
   findingAssignments   Finding[]            @relation("FindingAssignee")
   apiKeys              ApiKey[]
+  riskAcceptances      RiskAcceptance[]
 }
 
 // API key for programmatic / automated scan ingestion. The plaintext key is
@@ -482,9 +483,28 @@ model Poam {
   controls   PoamControl[]
   mitigations MitigationStatement[] @relation("PoamMitigation")
   comments    Comment[]
+  riskAcceptance RiskAcceptance?
 
   @@unique([systemId, number])
   @@index([systemId, status])
+}
+
+// Formal risk acceptance / waiver for a POA&M, recorded on behalf of the
+// Authorizing Official. One per POA&M; setting it moves the POA&M to
+// RISK_ACCEPTED and records rationale, residual risk, and a review date.
+model RiskAcceptance {
+  id                  String      @id @default(cuid())
+  poam                Poam        @relation(fields: [poamId], references: [id], onDelete: Cascade)
+  poamId              String      @unique
+  acceptedBy          User        @relation(fields: [acceptedById], references: [id])
+  acceptedById        String
+  authorizingOfficial String // AO name who approved the acceptance
+  rationale           String      @db.Text
+  residualRisk        ImpactLevel
+  acceptedAt          DateTime    @default(now())
+  reviewBy            DateTime? // date the acceptance must be re-reviewed
+
+  @@index([reviewBy])
 }
 
 model Milestone {

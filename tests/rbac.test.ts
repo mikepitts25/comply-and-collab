@@ -32,6 +32,14 @@ describe("RBAC capability matrix", () => {
     expect(can("ADMIN", "apikey:manage")).toBe(true);
   });
 
+  it("risk acceptance is limited to ISSM and ADMIN", () => {
+    expect(can("ISSM", "risk:accept")).toBe(true);
+    expect(can("ADMIN", "risk:accept")).toBe(true);
+    expect(can("ISSO", "risk:accept")).toBe(false);
+    expect(can("ANALYST", "risk:accept")).toBe(false);
+    expect(can("ENGINEER", "risk:accept")).toBe(false);
+  });
+
   it("every role's capabilities are a subset of ADMIN's", () => {
     const admin = new Set(ROLE_CAPABILITIES.ADMIN);
     for (const [role, caps] of Object.entries(ROLE_CAPABILITIES)) {

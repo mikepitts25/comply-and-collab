@@ -15,6 +15,7 @@ export type Capability =
   | "inventory:manage"
   | "apikey:manage"
   | "control:document"
+  | "risk:accept"
   | "comment:create";
 
 const ALL: Capability[] = [
@@ -29,6 +30,7 @@ const ALL: Capability[] = [
   "inventory:manage",
   "apikey:manage",
   "control:document",
+  "risk:accept",
   "comment:create",
 ];
 
@@ -44,6 +46,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     "mitigation:approve",
     "inventory:manage",
     "control:document",
+    "risk:accept",
     "comment:create",
   ],
   ISSO: [

@@ -129,6 +129,24 @@ async function main() {
   if (poams[0]) await prisma.poam.update({ where: { id: poams[0].id }, data: { ownerId: engineer.id, status: "ONGOING" } });
   if (poams[1]) await prisma.poam.update({ where: { id: poams[1].id }, data: { ownerId: engineer.id } });
 
+  // Formally accept risk on a low-severity POA&M (with a near-term review).
+  const lowPoam = poams.find((p) => p.severity === "LOW");
+  if (lowPoam) {
+    const reviewBy = new Date();
+    reviewBy.setDate(reviewBy.getDate() + 20);
+    await prisma.riskAcceptance.create({
+      data: {
+        poamId: lowPoam.id,
+        acceptedById: issm.id,
+        authorizingOfficial: "Col. P. Stone (AO)",
+        rationale: "Low-severity finding with compensating controls (enclave boundary banner, restricted physical access). Accepted pending the next maintenance window.",
+        residualRisk: "LOW",
+        reviewBy,
+      },
+    });
+    await prisma.poam.update({ where: { id: lowPoam.id }, data: { status: "RISK_ACCEPTED", residualRisk: "LOW" } });
+  }
+
   // Assign the highest-severity open findings to the engineer.
   const criticalFindings = await prisma.finding.findMany({
     where: { systemId: system.id, status: "OPEN", severity: { in: ["CRITICAL", "HIGH"] } },
