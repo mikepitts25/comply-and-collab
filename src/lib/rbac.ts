@@ -14,6 +14,7 @@ export type Capability =
   | "catalog:load"
   | "inventory:manage"
   | "apikey:manage"
+  | "control:document"
   | "comment:create";
 
 const ALL: Capability[] = [
@@ -27,6 +28,7 @@ const ALL: Capability[] = [
   "catalog:load",
   "inventory:manage",
   "apikey:manage",
+  "control:document",
   "comment:create",
 ];
 
@@ -41,6 +43,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     "mitigation:create",
     "mitigation:approve",
     "inventory:manage",
+    "control:document",
     "comment:create",
   ],
   ISSO: [
@@ -51,6 +54,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     "poam:milestone",
     "mitigation:create",
     "inventory:manage",
+    "control:document",
     "comment:create",
   ],
   ANALYST: [
@@ -61,6 +65,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     "poam:milestone",
     "mitigation:create",
     "inventory:manage",
+    "control:document",
     "comment:create",
   ],
   // Engineers remediate and maintain inventory.
