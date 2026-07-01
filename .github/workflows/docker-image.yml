@@ -1,0 +1,45 @@
+name: Docker Image
+
+# Validates that the production container image builds cleanly (the artifact
+# used for on-prem / air-gapped deployment). Build only — nothing is pushed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "docker-entrypoint.sh"
+      - "docker-compose.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "prisma/**"
+      - "src/**"
+      - ".github/workflows/docker-image.yml"
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - "docker-entrypoint.sh"
+      - "package.json"
+      - "package-lock.json"
+      - "prisma/**"
+      - "src/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: comply-and-collab:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test (entrypoint script is valid & app layer present)
+        run: |
+          docker run --rm --entrypoint sh comply-and-collab:ci -c 'sh -n docker-entrypoint.sh && test -d .next && echo "image OK"'

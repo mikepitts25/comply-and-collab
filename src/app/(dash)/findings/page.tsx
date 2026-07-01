@@ -71,7 +71,17 @@ export default async function FindingsPage({
             Unified ACAS &amp; STIG findings correlated to NIST 800-53 controls.
           </p>
         </div>
-        <span className="text-sm text-ink-500">{total} matching</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-ink-500">{total} matching</span>
+          <a
+            href={`/api/export/findings?${buildQuery({}).split("?")[1] ?? ""}`}
+            className="btn-ghost"
+            download
+            title="Export the current findings register (respects filters) as CSV"
+          >
+            Export CSV
+          </a>
+        </div>
       </div>
 
       {/* Filters */}
