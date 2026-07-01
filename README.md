@@ -61,9 +61,12 @@ Subsequent runs: `docker compose up` (drop `SEED=true` after the first boot). Se
 cp .env.example .env                 # then edit DATABASE_URL / AUTH_SECRET
 npm install
 npm run db:migrate                   # apply migrations (or: npm run db:push)
-npm run db:seed                      # load demo system, scans, POA&Ms
+npm run db:seed                      # load demo systems, scans, POA&Ms
 npm run dev                          # http://localhost:3000
+npm test                             # Vitest unit suite (parsers, RBAC, exports, …)
 ```
+
+Tests and a type-check/build run in CI (`.github/workflows/ci.yml`) on every push and PR.
 
 ### Demo accounts
 
