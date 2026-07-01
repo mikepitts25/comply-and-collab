@@ -65,11 +65,11 @@ async function main() {
   // --- Users ---
   const pw = await bcrypt.hash("Password123!", 10);
   const [admin, issm, analyst, engineer] = await Promise.all([
-    prisma.user.create({ data: { email: "admin@demo.mil", name: "Avery Admin", role: "ADMIN", passwordHash: pw } }),
-    prisma.user.create({ data: { email: "issm@demo.mil", name: "Morgan ISSM", role: "ISSM", passwordHash: pw } }),
-    prisma.user.create({ data: { email: "analyst@demo.mil", name: "Riley Analyst", role: "ANALYST", passwordHash: pw } }),
-    prisma.user.create({ data: { email: "engineer@demo.mil", name: "Jordan Engineer", role: "ENGINEER", passwordHash: pw } }),
-    prisma.user.create({ data: { email: "auditor@demo.mil", name: "Casey Auditor", role: "AUDITOR", passwordHash: pw } }),
+    prisma.user.create({ data: { email: "admin@demo.mil", name: "Avery Admin", role: "ADMIN", passwordHash: pw, edipi: "1000000001" } }),
+    prisma.user.create({ data: { email: "issm@demo.mil", name: "Morgan ISSM", role: "ISSM", passwordHash: pw, edipi: "1000000002" } }),
+    prisma.user.create({ data: { email: "analyst@demo.mil", name: "Riley Analyst", role: "ANALYST", passwordHash: pw, edipi: "1234567890" } }),
+    prisma.user.create({ data: { email: "engineer@demo.mil", name: "Jordan Engineer", role: "ENGINEER", passwordHash: pw, edipi: "1000000004" } }),
+    prisma.user.create({ data: { email: "auditor@demo.mil", name: "Casey Auditor", role: "AUDITOR", passwordHash: pw, edipi: "1000000005" } }),
   ]);
   console.log("  Users: admin / issm / analyst / engineer / auditor @demo.mil (pw: Password123!)");
 

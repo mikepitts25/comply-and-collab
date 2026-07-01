@@ -30,6 +30,7 @@
 - **Automated ingestion API** — token-authenticated `POST /api/v1/scans` so pipelines can push ACAS/STIG/SCAP results; admin-managed API keys (hashed, revocable, run as their owning user under RBAC).
 - **Collaboration** — per-finding and per-POA&M discussion threads, assignments, and an activity feed.
 - **Role-based access control** — capability-based RBAC enforced server-side on every mutation (Admin, ISSM, ISSO, Analyst, Engineer, Auditor), with the UI hiding actions a role can't perform and a read-only banner for observers.
+- **CAC/PIV authentication** — client-certificate sign-in via a trusted reverse proxy (subject-DN header → EDIPI → provisioned user), alongside local password auth. Config-gated (`CLIENT_CERT_AUTH`).
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
 
 ## Tech stack
@@ -140,7 +141,7 @@ samples/                 # example ACAS/STIG files
 - ✅ Hardware/software inventory + PPSM (ports, protocols & services)
 - ✅ eMASS-style POA&M XLSX export (styled workbook)
 - ✅ Automated scan ingestion API (token-authenticated)
-- CAC/PIV (client-cert) authentication
+- ✅ CAC/PIV (client-cert) authentication via trusted reverse proxy
 - Hardware/software inventory reconciliation and ports/protocols/services (PPSM)
 
 ---
