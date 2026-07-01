@@ -36,6 +36,7 @@
 - **Executive portfolio scorecard** — a printable cross-system risk rollup (ATO status/expiration, open findings by severity, POA&M and coverage per system) with Markdown export, for leadership reporting.
 - **Audit log** — a filterable, paginated trail of every action (imports, triage, POA&M changes, catalog loads, CAC sign-ins, API-key management) for compliance oversight.
 - **Role-based access control** — capability-based RBAC enforced server-side on every mutation (Admin, ISSM, ISSO, Analyst, Engineer, Auditor), with the UI hiding actions a role can't perform and a read-only banner for observers.
+- **User administration** — admins create/manage users, set roles, map EDIPI for CAC/PIV, reset passwords, and activate/deactivate accounts (with self-lockout protection).
 - **CAC/PIV authentication** — client-certificate sign-in via a trusted reverse proxy (subject-DN header → EDIPI → provisioned user), alongside local password auth. Config-gated (`CLIENT_CERT_AUTH`).
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
 

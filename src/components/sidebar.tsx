@@ -17,6 +17,7 @@ import {
   ScrollText,
   BarChart3,
   CircleUser,
+  Users,
 } from "lucide-react";
 
 const NAV = [
@@ -32,6 +33,7 @@ const NAV = [
   { href: "/audit", label: "Audit Log", icon: ScrollText },
   { href: "/import", label: "Import Scans", icon: Upload, requires: "scan:import" },
   { href: "/settings/api-keys", label: "API Keys", icon: KeyRound, requires: "apikey:manage" },
+  { href: "/settings/users", label: "Users", icon: Users, requires: "user:manage" },
 ];
 
 export function Sidebar({ capabilities }: { capabilities: string[] }) {
