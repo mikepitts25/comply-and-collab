@@ -79,6 +79,14 @@ export default async function SystemDetail({
             Coverage
           </a>
           <a
+            href={`/systems/${system.id}/cmmc`}
+            className="btn-ghost"
+            title="CMMC 2.0 / NIST 800-171 assessment"
+          >
+            <BookCheck className="h-4 w-4" />
+            CMMC
+          </a>
+          <a
             href={`/systems/${system.id}/inventory`}
             className="btn-ghost"
             title="Hardware, software, and PPSM inventory"
