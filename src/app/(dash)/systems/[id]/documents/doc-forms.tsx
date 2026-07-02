@@ -48,6 +48,18 @@ export function NewDocumentForm({ systemId }: { systemId: string }) {
         className="input"
         required
       />
+      <input
+        name="controls"
+        placeholder="Satisfies controls (e.g. AC-1, AU-1) — powers Policy Health"
+        aria-label="Controls this document satisfies"
+        className="input"
+      />
+      <select name="reviewFrequencyMonths" aria-label="Review frequency" className="input" defaultValue="">
+        <option value="">No periodic review</option>
+        <option value="6">Review every 6 months</option>
+        <option value="12">Review annually</option>
+        <option value="24">Review every 2 years</option>
+      </select>
       <ErrorNote state={state} />
       <button className="btn-primary sm:col-span-2" disabled={pending}>
         <FileUp className="h-4 w-4" /> {pending ? "Uploading…" : "Add document"}

@@ -10,6 +10,7 @@ import {
   isReviewDecision,
   MAX_DOCUMENT_BYTES,
 } from "@/lib/documents";
+import { normalizeControlIdCell } from "@/lib/import/controls-import";
 import type { DocumentCategory, DocumentStatus } from "@prisma/client";
 
 export type DocState = { ok?: boolean; error?: string };
@@ -42,6 +43,11 @@ export async function createDocumentAction(
     if (!systemId || !title || !changeNote || !file) {
       return { error: "Title, file, and an initial change note are required." };
     }
+    const controls = String(formData.get("controls") ?? "")
+      .split(/[,;\s]+/)
+      .map((c) => normalizeControlIdCell(c))
+      .filter((c): c is string => !!c);
+    const freqRaw = parseInt(String(formData.get("reviewFrequencyMonths") ?? ""), 10);
     await createDocument({
       systemId,
       title,
@@ -49,6 +55,8 @@ export async function createDocumentAction(
       changeNote,
       userId: user.id,
       file,
+      controls,
+      reviewFrequencyMonths: Number.isFinite(freqRaw) && freqRaw > 0 ? freqRaw : null,
     });
     revalidatePath(`/systems/${systemId}/documents`);
     return { ok: true };

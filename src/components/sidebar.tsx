@@ -18,6 +18,7 @@ import {
   BarChart3,
   CircleUser,
   Users,
+  CalendarDays,
 } from "lucide-react";
 
 const NAV = [
@@ -27,6 +28,8 @@ const NAV = [
   { href: "/findings", label: "Findings", icon: ShieldAlert },
   { href: "/poams", label: "POA&Ms", icon: ClipboardList },
   { href: "/conmon", label: "ConMon", icon: Activity },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays },
+  { href: "/policies", label: "Policies", icon: ScrollText },
   { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/controls", label: "Controls", icon: BookCheck },
   { href: "/mitigations", label: "Mitigations", icon: FileText },
