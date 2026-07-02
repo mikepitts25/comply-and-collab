@@ -6,6 +6,7 @@ import { fmtDate, poamNumber } from "@/lib/format";
 import { addCommentAction, updateFindingAction } from "@/app/actions/findings";
 import { getSessionUser } from "@/lib/auth";
 import { can } from "@/lib/rbac";
+import { DeviationCard } from "@/components/deviation-card";
 import type { FindingStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,10 @@ export default async function FindingDetail({
         controls: { include: { control: true } },
         poam: true,
         comments_rel: { include: { author: true }, orderBy: { createdAt: "asc" } },
+        deviations: {
+          include: { requestedBy: true, decidedBy: true },
+          orderBy: { requestedAt: "desc" },
+        },
       },
     }),
     prisma.user.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
@@ -202,6 +207,14 @@ export default async function FindingDetail({
               </>
             )}
           </div>
+
+          <DeviationCard
+            findingId={finding.id}
+            findingOpen={finding.status === "OPEN"}
+            deviations={finding.deviations}
+            canRequest={canUpdate}
+            canDecide={sessionUser ? can(sessionUser.role, "risk:accept") : false}
+          />
         </div>
       </div>
     </div>

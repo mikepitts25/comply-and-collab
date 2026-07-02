@@ -6,6 +6,8 @@ import { prisma } from "./db";
 import { deriveStatus, type RequirementStatus } from "./cmmc";
 import { ISO_27001 } from "./data/frameworks/iso-27001";
 import { CIS_V8 } from "./data/frameworks/cis-v8";
+import { NIST_CSF2 } from "./data/frameworks/nist-csf2";
+import { SOC2 } from "./data/frameworks/soc2";
 import type { FrameworkDef, FrameworkRequirement } from "./data/frameworks/types";
 import type { ControlStatus } from "@prisma/client";
 
@@ -15,6 +17,8 @@ export type { RequirementStatus };
 export const FRAMEWORKS: Record<string, FrameworkDef> = {
   [ISO_27001.key]: ISO_27001,
   [CIS_V8.key]: CIS_V8,
+  [NIST_CSF2.key]: NIST_CSF2,
+  [SOC2.key]: SOC2,
 };
 
 export interface AssessedFrameworkRequirement extends FrameworkRequirement {

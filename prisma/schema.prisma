@@ -45,6 +45,8 @@ model User {
   findingAssignments   Finding[]            @relation("FindingAssignee")
   apiKeys              ApiKey[]
   riskAcceptances      RiskAcceptance[]
+  deviationsRequested  Deviation[]           @relation("DeviationRequestor")
+  deviationsDecided    Deviation[]           @relation("DeviationDecider")
 }
 
 // API key for programmatic / automated scan ingestion. The plaintext key is
@@ -423,6 +425,7 @@ model Finding {
   poam     Poam?            @relation(fields: [poamId], references: [id], onDelete: SetNull)
   poamId   String?
   comments_rel Comment[]
+  deviations   Deviation[]
 
   @@unique([systemId, ruleId, assetId])
   @@index([systemId, status])
@@ -509,6 +512,48 @@ model RiskAcceptance {
   reviewBy            DateTime? // date the acceptance must be re-reviewed
 
   @@index([reviewBy])
+}
+
+// ---------------------------------------------------------------------------
+// Finding deviations (false positive / operational requirement)
+// ---------------------------------------------------------------------------
+
+enum DeviationType {
+  FALSE_POSITIVE // scanner result is incorrect for this asset
+  OPERATIONAL_REQUIREMENT // requirement cannot apply (documented justification)
+}
+
+enum DeviationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// A formal, reviewed request to deviate from a scan finding. Approval by a
+// senior role (risk:accept capability) updates the finding status:
+// FALSE_POSITIVE -> NOT_A_FINDING, OPERATIONAL_REQUIREMENT -> NOT_APPLICABLE.
+// Risk-with-remediation-later stays in the POA&M risk-acceptance flow.
+model Deviation {
+  id        String          @id @default(cuid())
+  finding   Finding         @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  findingId String
+  type      DeviationType
+  status    DeviationStatus @default(PENDING)
+
+  justification String @db.Text
+  evidence      String? @db.Text // e.g. version output, config excerpt
+
+  requestedBy   User   @relation("DeviationRequestor", fields: [requestedById], references: [id])
+  requestedById String
+  requestedAt   DateTime @default(now())
+
+  decidedBy   User?     @relation("DeviationDecider", fields: [decidedById], references: [id])
+  decidedById String?
+  decidedAt   DateTime?
+  decisionNote String?  @db.Text
+
+  @@index([findingId])
+  @@index([status])
 }
 
 model Milestone {
