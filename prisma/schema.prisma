@@ -48,6 +48,10 @@ model User {
   deviationsRequested  Deviation[]           @relation("DeviationRequestor")
   deviationsDecided    Deviation[]           @relation("DeviationDecider")
   evidenceUploads      Evidence[]
+  documentsCreated     SystemDocument[]      @relation("DocumentCreator")
+  documentsToReview    SystemDocument[]      @relation("DocumentReviewer")
+  documentVersions     DocumentVersion[]
+  documentEvents       DocumentEvent[]
 }
 
 // API key for programmatic / automated scan ingestion. The plaintext key is
@@ -131,6 +135,7 @@ model System {
   snapshots   PostureSnapshot[]
   ppsm        PpsmEntry[]
   interconnections Interconnection[]
+  documents   SystemDocument[]
 }
 
 enum AssetType {
@@ -716,4 +721,93 @@ model Evidence {
   uploadedAt   DateTime @default(now())
 
   @@index([systemControlId])
+}
+
+// ---------------------------------------------------------------------------
+// Document library (versioned files with a review workflow)
+// ---------------------------------------------------------------------------
+
+enum DocumentCategory {
+  POLICY
+  PLAN // SSP, IRP, contingency plan...
+  DIAGRAM
+  AUTHORIZATION // ATO letters, memos
+  ASSESSMENT // SARs, scan reports
+  AGREEMENT // ISAs, MOUs
+  OTHER
+}
+
+enum DocumentStatus {
+  DRAFT
+  READY_FOR_REVIEW
+  IN_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  ARCHIVED
+}
+
+// A tracked document for a system's ATO package. Content lives in versions;
+// the document row carries title/category and the review state.
+model SystemDocument {
+  id       String @id @default(cuid())
+  system   System @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId String
+
+  title    String
+  category DocumentCategory @default(OTHER)
+  status   DocumentStatus   @default(DRAFT)
+
+  createdBy   User   @relation("DocumentCreator", fields: [createdById], references: [id])
+  createdById String
+  reviewer    User?  @relation("DocumentReviewer", fields: [reviewerId], references: [id])
+  reviewerId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  versions DocumentVersion[]
+  events   DocumentEvent[]
+
+  @@index([systemId, status])
+}
+
+// Immutable file version: who uploaded it, when, and what changed.
+model DocumentVersion {
+  id         String         @id @default(cuid())
+  document   SystemDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String
+  versionNo  Int
+
+  filename    String
+  contentType String?
+  size        Int
+  sha256      String
+  data        Bytes
+
+  changeNote String @db.Text // what was modified in this version (required)
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  uploadedAt   DateTime @default(now())
+
+  @@unique([documentId, versionNo])
+  @@index([documentId])
+}
+
+// Per-document timeline: status transitions and review comments.
+model DocumentEvent {
+  id         String         @id @default(cuid())
+  document   SystemDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String
+
+  actor   User   @relation(fields: [actorId], references: [id])
+  actorId String
+
+  fromStatus DocumentStatus?
+  toStatus   DocumentStatus?
+  note       String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
 }

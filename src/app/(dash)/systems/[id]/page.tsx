@@ -119,6 +119,14 @@ export default async function SystemDetail({
             Evidence
           </a>
           <a
+            href={`/systems/${system.id}/documents`}
+            className="btn-ghost"
+            title="Versioned document library with review workflow"
+          >
+            <FileText className="h-4 w-4" />
+            Documents
+          </a>
+          <a
             href={`/systems/${system.id}/ssp`}
             className="btn-ghost"
             title="Generate the System Security Plan document"
