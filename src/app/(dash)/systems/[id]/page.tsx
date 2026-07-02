@@ -103,6 +103,22 @@ export default async function SystemDetail({
             Inventory
           </a>
           <a
+            href={`/systems/${system.id}/interconnections`}
+            className="btn-ghost"
+            title="System interconnections (ISA/MOU/MOA)"
+          >
+            <Boxes className="h-4 w-4" />
+            ISAs
+          </a>
+          <a
+            href={`/systems/${system.id}/evidence`}
+            className="btn-ghost"
+            title="Control evidence artifacts"
+          >
+            <FileText className="h-4 w-4" />
+            Evidence
+          </a>
+          <a
             href={`/systems/${system.id}/ssp`}
             className="btn-ghost"
             title="Generate the System Security Plan document"
