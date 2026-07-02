@@ -46,8 +46,10 @@ export async function importControlsSheet(args: {
   userId: string;
   filename: string;
   bytes: Uint8Array;
+  /** Parse and report what would happen without writing anything. */
+  dryRun?: boolean;
 }): Promise<ControlsImportSummary> {
-  const { systemId, userId, filename, bytes } = args;
+  const { systemId, userId, filename, bytes, dryRun = false } = args;
   const rows = await parseSheet(filename, bytes);
   const errors: string[] = [];
   if (rows.length < 2) return { documented: 0, updated: 0, unknownControls: [], errors: ["Sheet has no data rows."] };
@@ -82,6 +84,11 @@ export async function importControlsSheet(args: {
       where: { systemId_controlId: { systemId, controlId } },
       select: { id: true },
     });
+    if (dryRun) {
+      if (existing) updated++;
+      else documented++;
+      continue;
+    }
     if (existing) {
       await prisma.systemControl.update({
         where: { id: existing.id },
@@ -95,6 +102,8 @@ export async function importControlsSheet(args: {
       documented++;
     }
   }
+
+  if (dryRun) return { documented, updated, unknownControls: [...unknown], errors };
 
   await prisma.activity.create({
     data: {

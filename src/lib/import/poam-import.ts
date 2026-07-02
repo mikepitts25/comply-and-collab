@@ -147,8 +147,10 @@ export async function importPoamSheet(args: {
   userId: string;
   filename: string;
   bytes: Uint8Array;
+  /** Parse and report what would happen without writing anything. */
+  dryRun?: boolean;
 }): Promise<PoamImportSummary> {
-  const { systemId, userId, filename, bytes } = args;
+  const { systemId, userId, filename, bytes, dryRun = false } = args;
   const { rows, errors } = parsePoamRows(await parseSheet(filename, bytes));
 
   let created = 0;
@@ -182,6 +184,13 @@ export async function importPoamSheet(args: {
           })
         : null;
 
+    if (dryRun) {
+      if (existing) updated++;
+      else created++;
+      milestones += row.milestones.length;
+      continue;
+    }
+
     let poamId: string;
     if (existing) {
       await prisma.poam.update({ where: { id: existing.id }, data });
@@ -211,6 +220,8 @@ export async function importPoamSheet(args: {
       milestones += row.milestones.length;
     }
   }
+
+  if (dryRun) return { created, updated, milestones, errors };
 
   await prisma.activity.create({
     data: {

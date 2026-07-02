@@ -63,10 +63,15 @@ function SheetForm({
         aria-label={fileLabel}
         className="block w-full text-sm text-ink-700 file:mr-3 file:rounded-md file:border-0 file:bg-ink-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink-800 hover:file:bg-ink-200"
       />
-      <button className="btn-primary sm:col-span-2" disabled={pending}>
-        <FileSpreadsheet className="h-4 w-4" />
-        {pending ? "Importing…" : buttonLabel}
-      </button>
+      <div className="flex gap-2 sm:col-span-2">
+        <button name="mode" value="preview" className="btn-ghost flex-1" disabled={pending}>
+          {pending ? "Working…" : "Preview (no changes)"}
+        </button>
+        <button name="mode" value="import" className="btn-primary flex-1" disabled={pending}>
+          <FileSpreadsheet className="h-4 w-4" />
+          {pending ? "Working…" : buttonLabel}
+        </button>
+      </div>
       <Result state={state} />
     </form>
   );
