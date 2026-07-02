@@ -28,6 +28,7 @@
 - **Baseline control coverage & gap analysis** — for a system's categorization (Low/Mod/High), computes 800-53 baseline coverage: documented vs implemented per family, with drill-down and inline SSP narrative authoring to close gaps.
 - **Common control inheritance** — designate a system as a common control provider (enclave/hosting environment); subscribing systems inherit its implemented controls (counted toward coverage, marked INHERITED with provenance).
 - **Hardware/software inventory + PPSM** — per-system hardware list (make/model/serial/location/virtual), software inventory, and Ports/Protocols/Services Management registration (port, protocol, direction, boundary, classification, approval status) — flowing into the SSP.
+- **Spreadsheet imports (no retyping)** — bring existing trackers in from `.csv`/`.xlsx`: a **POA&M workbook** (headers matched flexibly; rows with a POA&M Item ID update in place, so export → edit in Excel → re-import round-trips without duplicates, milestones included) and an **SSP control tracker** (Control / Status / Narrative → documented controls). Samples in `samples/`.
 - **Exports & documents** — eMASS-style POA&M in **XLSX** (styled workbook) and CSV; a hardware/software/PPSM **inventory workbook**; printable **SSP** (System Security Plan) and **SAR** (Security Assessment Report); an executive **portfolio scorecard**; and **STIG checklist export** — regenerate a DISA `.ckl` (STIG Viewer 2.x) or `.cklb` (STIG Viewer 3) per asset from current finding statuses, to round-trip triage back into STIG Viewer / eMASS.
 - **Continuous monitoring (ConMon)** — posture trend chart (open findings over time by severity), finding burndown, aging buckets, and scan cadence. Rescans **auto-close** remediated findings (first/last-seen reconciliation) and auto-complete fully-resolved POA&Ms.
 - **Automated ingestion API** — token-authenticated `POST /api/v1/scans` so pipelines can push ACAS/STIG/SCAP results; admin-managed API keys (hashed, revocable, run as their owning user under RBAC).
@@ -98,6 +99,7 @@ Tests and a type-check/build run in CI (`.github/workflows/ci.yml`) on every pus
 - `rhel8-web01.ckl` — RHEL 8 STIG checklist (XML)
 - `windows-app01.cklb` — Windows Server 2022 STIG checklist (JSON)
 - `scap-rhel8-web01-xccdf.xml` — SCAP/XCCDF result for the RHEL 8 host
+- `poam-import-sample.csv` / `control-tracker-sample.csv` — spreadsheet-import templates
 
 ## How correlation works
 

@@ -1,0 +1,5 @@
+Control,Status,Narrative
+AC-2,Implemented,Accounts are provisioned through the service desk with ISSM approval; quarterly access reviews are documented in the audit share.
+AC-7,Partially Implemented,Windows lockout enforced via GPO; RHEL pam_faillock rollout scheduled next maintenance window.
+SC-28,Planned,BitLocker rollout for data volumes planned this quarter.
+AU-9,Not Implemented,

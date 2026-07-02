@@ -1,0 +1,3 @@
+POA&M Item ID,Control Vulnerability Description,Raw Severity Value,Status,Scheduled Completion Date,Milestone with Completion Dates,Source Identifying Control Vulnerability,Resources Required,Recommendations,Residual Risk Level
+,Legacy file server allows SMBv1 connections,High,Ongoing,2026-09-30,Disable SMBv1 via GPO (due 2026-08-15); Verify no clients break (due 2026-09-15),Manual assessment,Sysadmin time,Disable SMBv1 and enforce SMB signing,Moderate
+,Password policy allows 8-character passwords,Moderate,Ongoing,2026-10-31,Update policy document (due 2026-09-01) [complete]; Enforce via GPO (due 2026-10-15),Annual review,None,Raise minimum length to 15 characters,Low
