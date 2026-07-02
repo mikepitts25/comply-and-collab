@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { ImportForm } from "./import-form";
+import { SheetImports } from "./sheet-import-form";
 import { fmtDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,8 @@ export default async function ImportPage() {
       </div>
 
       <ImportForm systems={systems} />
+
+      <SheetImports systems={systems} />
 
       <div className="card p-5">
         <h2 className="mb-3 text-sm font-semibold text-ink-700">Recent imports</h2>
