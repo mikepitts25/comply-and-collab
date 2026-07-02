@@ -42,6 +42,7 @@
 - **Deviation workflow** — analysts/engineers request a **false positive** or **operational requirement** deviation on a finding (justification + evidence); ISSM/Admin approve or reject. Approval retires the finding (Not a Finding / Not Applicable) with the full request→decision trail preserved and audit-logged.
 - **System interconnections (ISAs)** — document external connections per CA-3 (remote system, connection type, direction, data/classification, ISA/MOU/MOA agreement with dates) with expiration warnings and lifecycle status.
 - **Control evidence repository** — attach assessment artifacts (config excerpts, screenshots, policies; 10 MB each, SHA-256 integrity-hashed, stored in the database for air-gap portability) to documented controls, with authenticated download and full audit trail.
+- **Accessibility (Section 508 / WCAG 2.1 AA)** — skip-to-content link, keyboard focus indicators, labeled form controls, `aria-current` navigation, contrast-checked palette; enforced by automated axe-core scans in the E2E suite (serious/critical violations fail CI).
 - **Rate limiting** — login attempts (per IP + account, with audit-log entries) and the ingestion API (per IP, 429 + Retry-After) are throttled against brute force.
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
 

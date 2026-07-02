@@ -111,6 +111,7 @@ export default async function InterconnectionsPage({
                           <input type="hidden" name="systemId" value={system.id} />
                           <select
                             name="status"
+                            aria-label="Interconnection status"
                             defaultValue={ic.status}
                             className="input w-36 py-1 text-xs"
                           >
@@ -123,7 +124,7 @@ export default async function InterconnectionsPage({
                         <form action={deleteInterconnectionAction}>
                           <input type="hidden" name="id" value={ic.id} />
                           <input type="hidden" name="systemId" value={system.id} />
-                          <button className="btn-ghost py-0.5 text-xs text-red-600" title="Delete">✕</button>
+                          <button className="btn-ghost py-0.5 text-xs text-red-600" title="Delete" aria-label="Delete interconnection">✕</button>
                         </form>
                       </div>
                     </td>

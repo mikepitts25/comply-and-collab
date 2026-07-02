@@ -54,7 +54,7 @@ export function SystemFields({ d = {}, create }: { d?: SystemDefaults; create?: 
           </div>
         ))}
       </div>
-      <p className="text-xs text-ink-400">Overall categorization is the FIPS 199 high-water mark of C/I/A.</p>
+      <p className="text-xs text-ink-500">Overall categorization is the FIPS 199 high-water mark of C/I/A.</p>
       <div>
         <label className="label">Frameworks</label>
         <div className="flex flex-wrap gap-3">

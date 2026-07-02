@@ -61,7 +61,7 @@ export default async function PoamsPage() {
                     <Link href={`/poams/${p.id}`} className="font-medium text-ink-900 hover:underline">
                       {p.weakness}
                     </Link>
-                    <div className="text-[11px] text-ink-400">
+                    <div className="text-[11px] text-ink-500">
                       {p._count.findings} finding(s) · {p._count.milestones} milestone(s)
                     </div>
                   </td>

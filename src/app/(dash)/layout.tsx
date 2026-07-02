@@ -28,6 +28,12 @@ export default async function DashLayout({
 
   return (
     <div className="flex min-h-screen">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-ink-900 focus:px-3 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Skip to content
+      </a>
       <Sidebar capabilities={capabilities} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-ink-200 bg-white px-6 py-3 print:hidden">
@@ -47,13 +53,13 @@ export default async function DashLayout({
               </div>
             </Link>
             <form action={logoutAction}>
-              <button className="btn-ghost" title="Sign out">
+              <button className="btn-ghost" title="Sign out" aria-label="Sign out">
                 <LogOut className="h-4 w-4" />
               </button>
             </form>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 print:overflow-visible print:p-0">{children}</main>
+        <main id="main" className="flex-1 overflow-y-auto p-6 print:overflow-visible print:p-0">{children}</main>
       </div>
     </div>
   );

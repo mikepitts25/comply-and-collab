@@ -84,7 +84,7 @@ export default async function ReportsPage() {
           </tbody>
         </table>
 
-        <p className="text-xs text-ink-400">
+        <p className="text-xs text-ink-500">
           {d.riskAcceptances} formal risk acceptance(s) on record. CCP = common control provider.
         </p>
       </article>

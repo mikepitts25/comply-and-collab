@@ -231,7 +231,7 @@ export default async function Dashboard() {
               <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-ink-300" />
               <div>
                 <span className="text-ink-800">{a.summary}</span>{" "}
-                <span className="text-ink-400">
+                <span className="text-ink-500">
                   — {a.actor?.name ?? "system"} · {fmtDate(a.createdAt)}
                 </span>
               </div>
@@ -261,7 +261,7 @@ function KpiCard({
 }) {
   return (
     <Link href={href} className="card p-5 transition-shadow hover:shadow-md">
-      <div className="flex items-center justify-between text-ink-400">
+      <div className="flex items-center justify-between text-ink-500">
         <span className="text-xs font-semibold uppercase tracking-wide text-ink-500">
           {label}
         </span>

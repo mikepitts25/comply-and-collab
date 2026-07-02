@@ -36,11 +36,11 @@ export default async function SspPage({
       {/* Document */}
       <article className="card space-y-8 p-10 text-sm leading-relaxed text-ink-800 print:border-0 print:shadow-none">
         <header className="border-b border-ink-200 pb-5">
-          <p className="text-xs uppercase tracking-widest text-ink-400">
+          <p className="text-xs uppercase tracking-widest text-ink-500">
             System Security Plan
           </p>
           <h1 className="mt-1 text-2xl font-semibold text-ink-900">
-            {s.name} <span className="text-ink-400">({s.acronym})</span>
+            {s.name} <span className="text-ink-500">({s.acronym})</span>
           </h1>
           <p className="mt-1 text-xs text-ink-500">
             Generated {fmtDate(d.generatedAt)} · Comply &amp; Collab · For Official Use Only

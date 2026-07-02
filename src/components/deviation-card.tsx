@@ -61,7 +61,7 @@ export function DeviationCard({
                 {d.evidence}
               </p>
             )}
-            <div className="mt-2 text-[11px] text-ink-400">
+            <div className="mt-2 text-[11px] text-ink-500">
               Requested by {d.requestedBy.name} · {fmtDate(d.requestedAt)}
               {d.decidedBy && (
                 <>

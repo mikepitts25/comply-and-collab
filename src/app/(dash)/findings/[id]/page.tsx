@@ -61,7 +61,7 @@ export default async function FindingDetail({
             </span>
           </div>
           <h1 className="text-xl font-semibold text-ink-900">{finding.title}</h1>
-          <p className="mt-1 font-mono text-xs text-ink-400">
+          <p className="mt-1 font-mono text-xs text-ink-500">
             {finding.stigId ? `${finding.stigId} · ` : ""}
             {finding.ruleId}
             {finding.cve ? ` · ${finding.cve}` : ""}
@@ -189,12 +189,12 @@ export default async function FindingDetail({
                 </Link>
               ))}
               {finding.controls.length === 0 && (
-                <span className="text-xs text-ink-400">No control mapping.</span>
+                <span className="text-xs text-ink-500">No control mapping.</span>
               )}
             </div>
             {finding.ccis.length > 0 && (
               <>
-                <h3 className="mb-1 mt-3 text-xs font-semibold uppercase text-ink-400">
+                <h3 className="mb-1 mt-3 text-xs font-semibold uppercase text-ink-500">
                   CCIs
                 </h3>
                 <div className="flex flex-wrap gap-1">

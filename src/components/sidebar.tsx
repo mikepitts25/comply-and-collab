@@ -55,6 +55,7 @@ export function Sidebar({ capabilities }: { capabilities: string[] }) {
             <Link
               key={href}
               href={href}
+              aria-current={active ? "page" : undefined}
               className={clsx(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active
@@ -68,7 +69,7 @@ export function Sidebar({ capabilities }: { capabilities: string[] }) {
           );
         })}
       </nav>
-      <div className="px-5 py-4 text-[11px] text-ink-500">
+      <div className="px-5 py-4 text-[11px] text-ink-400">
         Air-gap ready · v0.1
       </div>
     </aside>
