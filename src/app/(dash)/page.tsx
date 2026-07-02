@@ -52,7 +52,7 @@ export default async function Dashboard() {
   aged90.setDate(aged90.getDate() - 90);
   const in30 = new Date(now);
   in30.setDate(in30.getDate() + 30);
-  const [atoExpiring, overduePoams, agedFindings, pendingPpsm, riskReviews, isaExpiring, pendingDeviations, docsInReview] = await Promise.all([
+  const [atoExpiring, overduePoams, agedFindings, pendingPpsm, riskReviews, isaExpiring, pendingDeviations, docsInReview, docReviewsOverdue] = await Promise.all([
     prisma.system.count({
       where: { authorizationStatus: { in: ["ATO", "ATO_WITH_CONDITIONS", "IATT"] }, atoExpiration: { lte: in90 } },
     }),
@@ -67,6 +67,7 @@ export default async function Dashboard() {
     }),
     prisma.deviation.count({ where: { status: "PENDING" } }),
     prisma.systemDocument.count({ where: { status: { in: ["READY_FOR_REVIEW", "IN_REVIEW"] } } }),
+    prisma.systemDocument.count({ where: { nextReviewDue: { lt: now }, status: { not: "ARCHIVED" } } }),
   ]);
   const attention = [
     { n: atoExpiring, label: "ATOs expiring within 90 days", href: "/systems" },
@@ -77,6 +78,7 @@ export default async function Dashboard() {
     { n: isaExpiring, label: "Interconnection agreements expiring within 90 days", href: "/systems" },
     { n: pendingDeviations, label: "Deviation requests awaiting decision", href: "/findings" },
     { n: docsInReview, label: "Documents awaiting review", href: "/my-work" },
+    { n: docReviewsOverdue, label: "Policy/document reviews overdue", href: "/policies" },
   ].filter((a) => a.n > 0);
 
   return (

@@ -762,6 +762,12 @@ model SystemDocument {
   reviewer    User?  @relation("DocumentReviewer", fields: [reviewerId], references: [id])
   reviewerId  String?
 
+  // Policy lifecycle: controls this document satisfies (e.g. ["AC-1"]) and
+  // the periodic re-review cadence. nextReviewDue is set on approval.
+  controls             String[] @default([])
+  reviewFrequencyMonths Int?
+  nextReviewDue        DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

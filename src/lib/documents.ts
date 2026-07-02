@@ -4,6 +4,7 @@
 
 import { prisma } from "./db";
 import { sha256Hex } from "./evidence";
+import { nextReviewDate } from "./policies";
 import type { DocumentStatus, DocumentCategory } from "@prisma/client";
 
 export const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024; // 25 MB per version
@@ -44,6 +45,8 @@ export async function createDocument(args: {
   changeNote: string;
   userId: string;
   file: DocFile;
+  controls?: string[];
+  reviewFrequencyMonths?: number | null;
 }) {
   const { systemId, title, category, changeNote, userId, file } = args;
   const doc = await prisma.systemDocument.create({
@@ -51,6 +54,8 @@ export async function createDocument(args: {
       systemId,
       title,
       category,
+      controls: args.controls ?? [],
+      reviewFrequencyMonths: args.reviewFrequencyMonths ?? null,
       createdById: userId,
       versions: {
         create: {
@@ -155,6 +160,10 @@ export async function setDocumentStatus(args: {
       status: to,
       // Claiming a review records the reviewer; leaving review keeps history.
       ...(to === "IN_REVIEW" ? { reviewerId: args.reviewerId ?? userId } : {}),
+      // Approval starts the re-review clock (policy lifecycle).
+      ...(to === "APPROVED"
+        ? { nextReviewDue: nextReviewDate(new Date(), doc.reviewFrequencyMonths) }
+        : {}),
     },
   });
   await prisma.documentEvent.create({
