@@ -29,13 +29,14 @@ export async function importPoamSheetAction(
   const systemId = String(formData.get("systemId") ?? "");
   const file = await fileBytes(formData);
   if (!systemId || !file) return { error: "Choose a system and a .csv/.xlsx file." };
+  const dryRun = String(formData.get("mode")) === "preview";
 
   try {
-    const r = await importPoamSheet({ systemId, userId: user.id, filename: file.name, bytes: file.bytes });
-    revalidatePath("/poams");
+    const r = await importPoamSheet({ systemId, userId: user.id, filename: file.name, bytes: file.bytes, dryRun });
+    if (!dryRun) revalidatePath("/poams");
     return {
       ok: true,
-      message: `POA&Ms: ${r.created} created, ${r.updated} updated, ${r.milestones} milestone(s) imported.`,
+      message: `${dryRun ? "Preview (no changes made) — would import: " : "POA&Ms: "}${r.created} created, ${r.updated} updated, ${r.milestones} milestone(s).`,
       warnings: r.errors,
     };
   } catch (e) {
@@ -51,17 +52,18 @@ export async function importControlsSheetAction(
   const systemId = String(formData.get("systemId") ?? "");
   const file = await fileBytes(formData);
   if (!systemId || !file) return { error: "Choose a system and a .csv/.xlsx file." };
+  const dryRun = String(formData.get("mode")) === "preview";
 
   try {
-    const r = await importControlsSheet({ systemId, userId: user.id, filename: file.name, bytes: file.bytes });
-    revalidatePath(`/systems/${systemId}`);
+    const r = await importControlsSheet({ systemId, userId: user.id, filename: file.name, bytes: file.bytes, dryRun });
+    if (!dryRun) revalidatePath(`/systems/${systemId}`);
     const warn = [...r.errors];
     if (r.unknownControls.length) {
       warn.push(`Unknown control id(s) skipped: ${r.unknownControls.slice(0, 8).join(", ")}${r.unknownControls.length > 8 ? "…" : ""}`);
     }
     return {
       ok: true,
-      message: `Controls: ${r.documented} newly documented, ${r.updated} updated.`,
+      message: `${dryRun ? "Preview (no changes made) — would document: " : "Controls: "}${r.documented} newly documented, ${r.updated} updated.`,
       warnings: warn,
     };
   } catch (e) {

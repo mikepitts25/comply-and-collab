@@ -39,6 +39,26 @@ export default async function MyWorkPage() {
       : Promise.resolve([]),
   ]);
 
+  // Documents waiting on a reviewer: unclaimed ready-for-review items for any
+  // senior role, plus reviews this user has already claimed.
+  const canDocReview = can(user.role, "mitigation:approve");
+  const docsToReview = canDocReview
+    ? await prisma.systemDocument.findMany({
+        where: {
+          OR: [
+            { status: "READY_FOR_REVIEW" },
+            { status: "IN_REVIEW", reviewerId: user.id },
+          ],
+        },
+        orderBy: { updatedAt: "asc" },
+        include: {
+          system: { select: { id: true, acronym: true } },
+          createdBy: { select: { name: true } },
+          versions: { orderBy: { versionNo: "desc" }, take: 1 },
+        },
+      })
+    : [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -124,6 +144,35 @@ export default async function MyWorkPage() {
                 );
               })}
               {reviews.length === 0 && <tr><td className="td text-ink-500" colSpan={4}>No risk acceptances due for review.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {canDocReview && (
+        <div className="card overflow-hidden">
+          <div className="border-b border-ink-200 px-5 py-3 text-sm font-semibold text-ink-700">
+            Documents awaiting review ({docsToReview.length})
+          </div>
+          <table className="w-full">
+            <thead className="border-b border-ink-200 bg-ink-50">
+              <tr><th className="th">Document</th><th className="th">System</th><th className="th">Author</th><th className="th">Version</th><th className="th">Status</th></tr>
+            </thead>
+            <tbody className="divide-y divide-ink-100">
+              {docsToReview.map((doc) => (
+                <tr key={doc.id} className="hover:bg-ink-50">
+                  <td className="td">
+                    <Link href={`/systems/${doc.system.id}/documents/${doc.id}`} className="font-medium text-ink-900 hover:underline">
+                      {doc.title}
+                    </Link>
+                  </td>
+                  <td className="td text-xs">{doc.system.acronym}</td>
+                  <td className="td text-xs">{doc.createdBy.name}</td>
+                  <td className="td text-xs">v{doc.versions[0]?.versionNo ?? 0} · {fmtDate(doc.updatedAt)}</td>
+                  <td className="td text-xs">{doc.status === "IN_REVIEW" ? "In review (yours)" : "Ready for review"}</td>
+                </tr>
+              ))}
+              {docsToReview.length === 0 && <tr><td className="td text-ink-500" colSpan={5}>No documents waiting on review.</td></tr>}
             </tbody>
           </table>
         </div>
