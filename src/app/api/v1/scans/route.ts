@@ -3,9 +3,15 @@ import { prisma } from "@/lib/db";
 import { authenticateApiKey } from "@/lib/apikey";
 import { can } from "@/lib/rbac";
 import { ingestScan } from "@/lib/ingest";
+import { rateLimit, clientIpFrom } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+// 30 ingest calls per minute per client IP (bad keys burn the same bucket,
+// so credential guessing is throttled too).
+const API_LIMIT = 30;
+const API_WINDOW_MS = 60_000;
 
 /**
  * POST /api/v1/scans?system=<id>
@@ -17,6 +23,14 @@ export const runtime = "nodejs";
  * as the API key's owner, so that user's role must hold scan:import.
  */
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(`api:scans:${clientIpFrom(req.headers)}`, API_LIMIT, API_WINDOW_MS);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } }
+    );
+  }
+
   const actor = await authenticateApiKey(
     req.headers.get("authorization") ?? req.headers.get("x-api-key")
   );
