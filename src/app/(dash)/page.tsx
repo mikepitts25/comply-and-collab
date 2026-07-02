@@ -52,7 +52,7 @@ export default async function Dashboard() {
   aged90.setDate(aged90.getDate() - 90);
   const in30 = new Date(now);
   in30.setDate(in30.getDate() + 30);
-  const [atoExpiring, overduePoams, agedFindings, pendingPpsm, riskReviews] = await Promise.all([
+  const [atoExpiring, overduePoams, agedFindings, pendingPpsm, riskReviews, isaExpiring, pendingDeviations] = await Promise.all([
     prisma.system.count({
       where: { authorizationStatus: { in: ["ATO", "ATO_WITH_CONDITIONS", "IATT"] }, atoExpiration: { lte: in90 } },
     }),
@@ -62,6 +62,10 @@ export default async function Dashboard() {
     prisma.finding.count({ where: { status: "OPEN", firstSeen: { lt: aged90 } } }),
     prisma.ppsmEntry.count({ where: { status: "PENDING" } }),
     prisma.riskAcceptance.count({ where: { reviewBy: { lte: in30 } } }),
+    prisma.interconnection.count({
+      where: { status: { in: ["ACTIVE", "PENDING_APPROVAL"] }, expiresAt: { lte: in90 } },
+    }),
+    prisma.deviation.count({ where: { status: "PENDING" } }),
   ]);
   const attention = [
     { n: atoExpiring, label: "ATOs expiring within 90 days", href: "/systems" },
@@ -69,6 +73,8 @@ export default async function Dashboard() {
     { n: agedFindings, label: "Open findings aged over 90 days", href: "/findings" },
     { n: pendingPpsm, label: "PPSM entries pending approval", href: "/systems" },
     { n: riskReviews, label: "Risk acceptances due for review", href: "/poams" },
+    { n: isaExpiring, label: "Interconnection agreements expiring within 90 days", href: "/systems" },
+    { n: pendingDeviations, label: "Deviation requests awaiting decision", href: "/findings" },
   ].filter((a) => a.n > 0);
 
   return (

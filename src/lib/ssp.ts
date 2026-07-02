@@ -11,10 +11,14 @@ export async function gatherSsp(systemId: string) {
         orderBy: { hostname: "asc" },
         include: { _count: { select: { software: true } } },
       },
-      controls: { include: { control: true }, orderBy: { controlId: "asc" } },
+      controls: {
+        include: { control: true, _count: { select: { evidence: true } } },
+        orderBy: { controlId: "asc" },
+      },
       findings: { where: { status: "OPEN" }, select: { severity: true } },
       poams: { select: { status: true } },
       ppsm: { orderBy: [{ status: "asc" }, { port: "asc" }] },
+      interconnections: { orderBy: [{ status: "asc" }, { remoteName: "asc" }] },
     },
   });
   if (!system) return null;
@@ -96,7 +100,20 @@ export function sspMarkdown(d: SspData): string {
   }
   if (s.ppsm.length === 0) L.push(`| — | — | — | — | — | — |`);
   L.push("");
-  L.push("## 5. Control Implementation Summary");
+  L.push("## 5. System Interconnections (CA-3)");
+  L.push("");
+  L.push(`| Remote System | Connection | Direction | Data / Class. | Agreement | Expires | Status |`);
+  L.push(`| --- | --- | --- | --- | --- | --- | --- |`);
+  for (const ic of s.interconnections) {
+    L.push(
+      `| ${ic.remoteName}${ic.remoteOwner ? ` (${ic.remoteOwner})` : ""} | ${ic.connectionType} | ` +
+        `${ic.direction} | ${ic.dataDescription ?? "—"}${ic.classification ? ` [${ic.classification}]` : ""} | ` +
+        `${ic.agreementType} ${fmtDate(ic.agreementDate)} | ${fmtDate(ic.expiresAt)} | ${ic.status.replace(/_/g, " ")} |`
+    );
+  }
+  if (s.interconnections.length === 0) L.push(`| — | — | — | — | — | — | — |`);
+  L.push("");
+  L.push("## 6. Control Implementation Summary");
   L.push("");
   L.push(
     `Implemented: ${d.statusCount("IMPLEMENTED")} · ` +
@@ -110,13 +127,17 @@ export function sspMarkdown(d: SspData): string {
     L.push(`### ${fam} — ${familyName(fam)}`);
     L.push("");
     for (const c of controls) {
-      L.push(`**${c.controlId} ${c.control.title}** — _${c.status.replace(/_/g, " ")}_`);
+      const ev = c._count.evidence;
+      L.push(
+        `**${c.controlId} ${c.control.title}** — _${c.status.replace(/_/g, " ")}_` +
+          (ev > 0 ? ` · ${ev} evidence artifact${ev === 1 ? "" : "s"}` : "")
+      );
       L.push("");
       L.push(c.narrative ?? "_No implementation narrative documented._");
       L.push("");
     }
   }
-  L.push("## 6. Risk Posture");
+  L.push("## 7. Risk Posture");
   L.push("");
   L.push(
     `Open findings — Critical: ${d.sevCount("CRITICAL")}, High: ${d.sevCount("HIGH")}, ` +

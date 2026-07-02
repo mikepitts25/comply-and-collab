@@ -117,7 +117,34 @@ export default async function SspPage({
           </table>
         </Section>
 
-        <Section n="5" title="Control Implementation Summary">
+        <Section n="5" title="System Interconnections (CA-3)">
+          <table className="w-full border border-ink-200 text-xs">
+            <thead className="bg-ink-50">
+              <tr>
+                <Th>Remote System</Th><Th>Connection</Th><Th>Direction</Th>
+                <Th>Data / Class.</Th><Th>Agreement</Th><Th>Expires</Th><Th>Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {s.interconnections.map((ic) => (
+                <tr key={ic.id} className="border-t border-ink-100">
+                  <Td>{ic.remoteName}{ic.remoteOwner ? ` (${ic.remoteOwner})` : ""}</Td>
+                  <Td>{ic.connectionType}</Td>
+                  <Td>{ic.direction}</Td>
+                  <Td>{ic.dataDescription ?? "—"}{ic.classification ? ` [${ic.classification}]` : ""}</Td>
+                  <Td>{ic.agreementType} {fmtDate(ic.agreementDate)}</Td>
+                  <Td>{fmtDate(ic.expiresAt)}</Td>
+                  <Td>{ic.status.replace(/_/g, " ")}</Td>
+                </tr>
+              ))}
+              {s.interconnections.length === 0 && (
+                <tr><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td></tr>
+              )}
+            </tbody>
+          </table>
+        </Section>
+
+        <Section n="6" title="Control Implementation Summary">
           <p className="mb-4 text-xs text-ink-500">
             Implemented {d.statusCount("IMPLEMENTED")} · Partial{" "}
             {d.statusCount("PARTIALLY_IMPLEMENTED")} · Planned{" "}
@@ -151,7 +178,7 @@ export default async function SspPage({
           )}
         </Section>
 
-        <Section n="6" title="Risk Posture">
+        <Section n="7" title="Risk Posture">
           <p>
             Open findings — Critical: {d.sevCount("CRITICAL")}, High:{" "}
             {d.sevCount("HIGH")}, Medium: {d.sevCount("MEDIUM")}, Low:{" "}
