@@ -38,6 +38,8 @@
 - **Role-based access control** — capability-based RBAC enforced server-side on every mutation (Admin, ISSM, ISSO, Analyst, Engineer, Auditor), with the UI hiding actions a role can't perform and a read-only banner for observers.
 - **User administration** — admins create/manage users, set roles, map EDIPI for CAC/PIV, reset passwords, and activate/deactivate accounts (with self-lockout protection).
 - **CAC/PIV authentication** — client-certificate sign-in via a trusted reverse proxy (subject-DN header → EDIPI → provisioned user), alongside local password auth. Config-gated (`CLIENT_CERT_AUTH`).
+- **Framework crosswalk (beyond US gov)** — per-system posture against **ISO/IEC 27001:2022** (all 93 Annex A controls) and **CIS Controls v8** (18 controls, IG tiers), derived from documented 800-53 implementation via crosswalk — no separate data entry, with CSV export. Adding a framework is a data-only change (`src/lib/data/frameworks/`).
+- **Rate limiting** — login attempts (per IP + account, with audit-log entries) and the ingestion API (per IP, 429 + Retry-After) are throttled against brute force.
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
 
 ## Tech stack

@@ -87,6 +87,14 @@ export default async function SystemDetail({
             CMMC
           </a>
           <a
+            href={`/systems/${system.id}/frameworks`}
+            className="btn-ghost"
+            title="ISO 27001 / CIS v8 framework crosswalk"
+          >
+            <BookCheck className="h-4 w-4" />
+            Frameworks
+          </a>
+          <a
             href={`/systems/${system.id}/inventory`}
             className="btn-ghost"
             title="Hardware, software, and PPSM inventory"
