@@ -40,6 +40,8 @@
 - **CAC/PIV authentication** — client-certificate sign-in via a trusted reverse proxy (subject-DN header → EDIPI → provisioned user), alongside local password auth. Config-gated (`CLIENT_CERT_AUTH`).
 - **Framework crosswalk (beyond US gov)** — per-system posture against **ISO/IEC 27001:2022** (93 Annex A controls), **CIS Controls v8** (18 controls, IG tiers), **NIST CSF 2.0** (22 categories across the 6 functions), and **SOC 2 TSC** (33 common criteria + Availability + Confidentiality), derived from documented 800-53 implementation via crosswalk — no separate data entry, with CSV export. Adding a framework is a data-only change (`src/lib/data/frameworks/`).
 - **Deviation workflow** — analysts/engineers request a **false positive** or **operational requirement** deviation on a finding (justification + evidence); ISSM/Admin approve or reject. Approval retires the finding (Not a Finding / Not Applicable) with the full request→decision trail preserved and audit-logged.
+- **System interconnections (ISAs)** — document external connections per CA-3 (remote system, connection type, direction, data/classification, ISA/MOU/MOA agreement with dates) with expiration warnings and lifecycle status.
+- **Control evidence repository** — attach assessment artifacts (config excerpts, screenshots, policies; 10 MB each, SHA-256 integrity-hashed, stored in the database for air-gap portability) to documented controls, with authenticated download and full audit trail.
 - **Rate limiting** — login attempts (per IP + account, with audit-log entries) and the ingestion API (per IP, 429 + Retry-After) are throttled against brute force.
 - **Frameworks** — NIST RMF / 800-53, DISA STIG/SRG, CMMC, FedRAMP (system-taggable).
 

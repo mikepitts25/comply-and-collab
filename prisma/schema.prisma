@@ -47,6 +47,7 @@ model User {
   riskAcceptances      RiskAcceptance[]
   deviationsRequested  Deviation[]           @relation("DeviationRequestor")
   deviationsDecided    Deviation[]           @relation("DeviationDecider")
+  evidenceUploads      Evidence[]
 }
 
 // API key for programmatic / automated scan ingestion. The plaintext key is
@@ -129,6 +130,7 @@ model System {
   controls    SystemControl[]
   snapshots   PostureSnapshot[]
   ppsm        PpsmEntry[]
+  interconnections Interconnection[]
 }
 
 enum AssetType {
@@ -294,6 +296,7 @@ model SystemControl {
   status    ControlStatus @default(NOT_IMPLEMENTED)
   narrative String?       @db.Text // implementation statement / SSP narrative
   inheritedFrom String?
+  evidence  Evidence[]
 
   updatedAt DateTime @updatedAt
 
@@ -644,4 +647,73 @@ model Activity {
 
   @@index([entity, entityId])
   @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// System interconnections (ISA/MOU/MOA) & control evidence
+// ---------------------------------------------------------------------------
+
+enum AgreementType {
+  ISA // Interconnection Security Agreement
+  MOU // Memorandum of Understanding
+  MOA // Memorandum of Agreement
+  SLA // Service Level Agreement
+  OTHER
+}
+
+enum InterconnectionStatus {
+  PLANNED
+  PENDING_APPROVAL
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+// A documented connection between this system and an external system —
+// the SSP interconnection table / CA-3 information exchange record.
+model Interconnection {
+  id       String @id @default(cuid())
+  system   System @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId String
+
+  remoteName    String // external system / organization name
+  remoteOwner   String? // owning organization / POC
+  connectionType String // e.g. "IPsec VPN", "Dedicated circuit", "HTTPS API"
+  direction     FlowDirection @default(BIDIRECTIONAL)
+  dataDescription String? @db.Text
+  classification  String? // e.g. "CUI", "Unclassified"
+
+  agreementType AgreementType         @default(ISA)
+  status        InterconnectionStatus @default(PENDING_APPROVAL)
+  agreementDate DateTime?
+  expiresAt     DateTime?
+  notes         String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([systemId])
+  @@index([expiresAt])
+}
+
+// Evidence artifact backing a control implementation (assessment proof):
+// config excerpts, screenshots, policy docs. Bytes live in Postgres so the
+// whole ATO package stays inside the database (air-gap friendly).
+model Evidence {
+  id              String        @id @default(cuid())
+  systemControl   SystemControl @relation(fields: [systemControlId], references: [id], onDelete: Cascade)
+  systemControlId String
+
+  description String
+  filename    String?
+  contentType String?
+  size        Int     @default(0)
+  sha256      String?
+  data        Bytes?
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  uploadedAt   DateTime @default(now())
+
+  @@index([systemControlId])
 }
