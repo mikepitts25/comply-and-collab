@@ -22,7 +22,7 @@ const CTRL_STATUS_CLS: Record<string, string> = {
   PLANNED: "bg-blue-50 text-blue-700",
   NOT_IMPLEMENTED: "bg-red-50 text-red-700",
   NOT_APPLICABLE: "bg-ink-100 text-ink-600",
-  UNDOCUMENTED: "bg-ink-50 text-ink-400 ring-1 ring-ink-200",
+  UNDOCUMENTED: "bg-ink-50 text-ink-500 ring-1 ring-ink-200",
 };
 
 function StatusBadge({ value }: { value: RequirementStatus }) {
@@ -115,7 +115,7 @@ export default async function FrameworksPage({
           </div>
           <div className="mt-1 text-3xl font-semibold text-ink-900">
             {a.met}
-            <span className="text-lg text-ink-400"> / {a.total}</span>
+            <span className="text-lg text-ink-500"> / {a.total}</span>
           </div>
           <div className="mt-1 text-xs text-ink-500">
             {pct(a.met, a.total)}% of {a.framework.unitLabel}s met
@@ -133,7 +133,7 @@ export default async function FrameworksPage({
               </div>
             ))}
           </div>
-          <p className="mt-3 text-xs text-ink-400">{a.framework.description}</p>
+          <p className="mt-3 text-xs text-ink-500">{a.framework.description}</p>
         </div>
       </div>
 
@@ -193,7 +193,7 @@ export default async function FrameworksPage({
         </div>
       ))}
 
-      <p className="text-xs text-ink-400">
+      <p className="text-xs text-ink-500">
         Crosswalk mappings are primary mappings (NIST OLIR practice); refine per your
         assessment scope. Statuses derive from this system&apos;s documented 800-53
         implementation (Controls / SSP).

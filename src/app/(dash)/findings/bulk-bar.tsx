@@ -43,16 +43,16 @@ export function BulkBar({
     <form action={bulkUpdateFindingsAction} onChange={onFormChange}>
       <div className="card mb-3 flex flex-wrap items-center gap-2 p-3">
         <label className="flex items-center gap-2 text-sm text-ink-700">
-          <input type="checkbox" onChange={toggleAll} className="h-4 w-4" />
+          <input type="checkbox" onChange={toggleAll} className="h-4 w-4" aria-label="Select all findings" />
           Select all
         </label>
         <span className="text-sm text-ink-500">{count} selected</span>
         <div className="mx-2 h-5 w-px bg-ink-200" />
-        <select name="status" defaultValue="" className="input w-44 py-1 text-sm">
+        <select name="status" defaultValue="" aria-label="Set status for selected findings" className="input w-44 py-1 text-sm">
           <option value="">Set status…</option>
           {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
         </select>
-        <select name="assigneeId" defaultValue="__keep__" className="input w-52 py-1 text-sm">
+        <select name="assigneeId" defaultValue="__keep__" aria-label="Set assignee for selected findings" className="input w-52 py-1 text-sm">
           <option value="__keep__">Keep assignee</option>
           <option value="">Unassign</option>
           {users.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}

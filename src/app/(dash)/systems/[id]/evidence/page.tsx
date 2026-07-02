@@ -94,7 +94,7 @@ export default async function EvidencePage({
               <li key={ev.id} className="flex items-start justify-between gap-3 px-5 py-3">
                 <div className="min-w-0">
                   <div className="text-sm text-ink-800">{ev.description}</div>
-                  <div className="mt-0.5 text-xs text-ink-400">
+                  <div className="mt-0.5 text-xs text-ink-500">
                     {ev.filename ? `${ev.filename} · ${fmtSize(ev.size)} · ` : ""}
                     {ev.uploadedBy.name} · {fmtDate(ev.uploadedAt)}
                     {ev.sha256 && (
@@ -106,7 +106,7 @@ export default async function EvidencePage({
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {ev.filename && (
-                    <a href={`/api/evidence/${ev.id}`} className="btn-ghost py-1 text-xs" title="Download">
+                    <a href={`/api/evidence/${ev.id}`} className="btn-ghost py-1 text-xs" title="Download" aria-label={`Download ${ev.filename}`}>
                       <Download className="h-3.5 w-3.5" />
                     </a>
                   )}
@@ -114,7 +114,7 @@ export default async function EvidencePage({
                     <form action={deleteEvidenceAction}>
                       <input type="hidden" name="id" value={ev.id} />
                       <input type="hidden" name="systemId" value={system.id} />
-                      <button className="btn-ghost py-1 text-xs text-red-600" title="Remove">✕</button>
+                      <button className="btn-ghost py-1 text-xs text-red-600" title="Remove" aria-label="Remove evidence">✕</button>
                     </form>
                   )}
                 </div>

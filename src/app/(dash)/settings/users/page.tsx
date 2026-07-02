@@ -62,9 +62,9 @@ export default async function UsersPage() {
                       <input type="checkbox" name="active" defaultChecked={u.active} disabled={u.id === me.id} />
                       Active
                     </label>
-                    <span className="text-xs text-ink-400">{fmtDate(u.createdAt)}</span>
+                    <span className="text-xs text-ink-500">{fmtDate(u.createdAt)}</span>
                     <button className="btn-ghost py-1 text-xs">Save</button>
-                    {u._count.apiKeys > 0 && <span className="text-[11px] text-ink-400">{u._count.apiKeys} key(s)</span>}
+                    {u._count.apiKeys > 0 && <span className="text-[11px] text-ink-500">{u._count.apiKeys} key(s)</span>}
                   </form>
                 </td>
               </tr>
@@ -72,7 +72,7 @@ export default async function UsersPage() {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-ink-400">
+      <p className="text-xs text-ink-500">
         You cannot deactivate your own account. New users receive the temporary password you set;
         they should change it after first sign-in.
       </p>

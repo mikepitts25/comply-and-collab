@@ -43,7 +43,7 @@ export function UploadEvidence({
       <button className="btn-primary sm:col-span-2" disabled={pending}>
         {pending ? "Uploading…" : "Attach evidence"}
       </button>
-      <p className="text-xs text-ink-400 sm:col-span-2">
+      <p className="text-xs text-ink-500 sm:col-span-2">
         File optional (10 MB max) — a description alone records where evidence lives
         (e.g. a document repository reference).
       </p>

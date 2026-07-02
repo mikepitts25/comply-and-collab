@@ -52,9 +52,9 @@ export default async function SystemsPage() {
                 <AtoBadge value={s.authorizationStatus} />
               </div>
               <div className="mt-3 flex items-center gap-2">
-                <span className="text-xs text-ink-400">Categorization:</span>
+                <span className="text-xs text-ink-500">Categorization:</span>
                 <ImpactBadge value={s.categorization} />
-                <span className="text-[11px] text-ink-400">
+                <span className="text-[11px] text-ink-500">
                   (C:{s.confidentiality[0]} I:{s.integrity[0]} A:{s.availability[0]})
                 </span>
               </div>
@@ -85,7 +85,7 @@ function Stat({ label, value, accent }: { label: string; value: number; accent?:
   return (
     <div className="rounded-md bg-ink-50 p-2">
       <div className={`text-lg font-semibold ${accent ?? "text-ink-900"}`}>{value}</div>
-      <div className="text-[11px] uppercase tracking-wide text-ink-400">{label}</div>
+      <div className="text-[11px] uppercase tracking-wide text-ink-500">{label}</div>
     </div>
   );
 }

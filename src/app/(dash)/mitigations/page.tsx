@@ -64,7 +64,7 @@ export default async function MitigationsPage() {
                 </span>
               ))}
             </div>
-            <div className="mt-3 text-xs text-ink-400">
+            <div className="mt-3 text-xs text-ink-500">
               {m.author?.name ?? "Unknown"} · {fmtDate(m.updatedAt)} · used in {m._count.poams} POA&M(s)
             </div>
           </div>

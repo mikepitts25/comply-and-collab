@@ -205,7 +205,7 @@ export default async function SystemDetail({
 
       {/* Frameworks */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase text-ink-400">Frameworks:</span>
+        <span className="text-xs font-semibold uppercase text-ink-500">Frameworks:</span>
         {system.frameworks.map((f) => (
           <span key={f} className="rounded bg-ink-100 px-2 py-0.5 text-xs text-ink-700">
             {frameworkLabel(f)}

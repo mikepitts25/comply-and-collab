@@ -48,7 +48,7 @@ export function CreateKey({
             <code className="flex-1 break-all rounded bg-white px-3 py-2 font-mono text-xs text-ink-800 ring-1 ring-ink-200">
               {state.plaintext}
             </code>
-            <Copy className="h-4 w-4 text-ink-400" />
+            <Copy className="h-4 w-4 text-ink-500" />
           </div>
         </div>
       )}

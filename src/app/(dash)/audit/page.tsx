@@ -59,14 +59,14 @@ export default async function AuditPage({
 
       {/* Filters */}
       <div className="card flex flex-wrap items-center gap-2 p-3">
-        <span className="px-1 text-xs font-semibold uppercase text-ink-400">Entity:</span>
+        <span className="px-1 text-xs font-semibold uppercase text-ink-500">Entity:</span>
         <Chip href={q({ entity: undefined, page: undefined })} active={!entity}>All</Chip>
         {entities.map((e) => (
           <Chip key={e.entity} href={q({ entity: e.entity, page: undefined })} active={entity === e.entity}>
             {e.entity}
           </Chip>
         ))}
-        <span className="ml-4 px-1 text-xs font-semibold uppercase text-ink-400">Actor:</span>
+        <span className="ml-4 px-1 text-xs font-semibold uppercase text-ink-500">Actor:</span>
         <form action="/audit" className="inline">
           {entity && <input type="hidden" name="entity" value={entity} />}
           <select name="actor" defaultValue={actorId ?? ""} className="input inline w-44 py-1">

@@ -137,12 +137,12 @@ export default async function CoveragePage({
                     <Link href={`/systems/${data.system.id}/coverage?family=${f.family}`} className="font-mono font-semibold text-ink-900 hover:underline">
                       {f.family}
                     </Link>
-                    <span className="ml-2 text-xs text-ink-400">{familyName(f.family)}</span>
+                    <span className="ml-2 text-xs text-ink-500">{familyName(f.family)}</span>
                   </td>
                   <td className="td">{f.baseline}</td>
                   <td className="td">{f.documented}</td>
                   <td className="td text-green-700">{f.implemented}</td>
-                  <td className={"td " + (f.gaps ? "text-red-600" : "text-ink-400")}>{f.gaps}</td>
+                  <td className={"td " + (f.gaps ? "text-red-600" : "text-ink-500")}>{f.gaps}</td>
                   <td className="td">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-20 rounded bg-ink-100">
@@ -181,7 +181,7 @@ export default async function CoveragePage({
                 <tr key={c.id} className={c.status ? "" : "bg-red-50/40"}>
                   <td className="td whitespace-nowrap font-mono text-xs">
                     <Link href={`/controls/${encodeURIComponent(c.id)}`} className="font-semibold text-ink-900 hover:underline">{c.id}</Link>
-                    <div className="text-[11px] font-normal text-ink-400">{c.title}</div>
+                    <div className="text-[11px] font-normal text-ink-500">{c.title}</div>
                   </td>
                   <td className={"td text-xs font-medium " + (c.status ? STATUS_CLS[c.status] : "text-red-600")}>
                     {c.status ? c.status.replace(/_/g, " ") : "Not documented"}

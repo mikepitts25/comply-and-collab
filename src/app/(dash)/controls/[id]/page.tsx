@@ -71,7 +71,7 @@ export default async function ControlDetail({
                       <Link href={`/findings/${f.id}`} className="text-ink-900 hover:underline">
                         {f.title}
                       </Link>
-                      <span className="ml-2 text-xs text-ink-400">{f.asset?.hostname}</span>
+                      <span className="ml-2 text-xs text-ink-500">{f.asset?.hostname}</span>
                     </td>
                     <td className="td text-xs">{f.system.acronym}</td>
                     <td className="td"><FindingStatusBadge value={f.status} /></td>
@@ -95,7 +95,7 @@ export default async function ControlDetail({
                   <p className="text-xs text-ink-600">{c.definition}</p>
                 </li>
               ))}
-              {control.ccis.length === 0 && <li className="text-xs text-ink-400">None.</li>}
+              {control.ccis.length === 0 && <li className="text-xs text-ink-500">None.</li>}
             </ul>
           </div>
 
@@ -111,7 +111,7 @@ export default async function ControlDetail({
                 </li>
               ))}
               {control.systemControls.length === 0 && (
-                <li className="text-xs text-ink-400">Not yet documented.</li>
+                <li className="text-xs text-ink-500">Not yet documented.</li>
               )}
             </ul>
           </div>

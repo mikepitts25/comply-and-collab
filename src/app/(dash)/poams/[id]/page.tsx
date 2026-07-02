@@ -90,7 +90,7 @@ export default async function PoamDetail({
                       <input type="hidden" name="milestoneId" value={m.id} />
                       <input type="hidden" name="poamId" value={poam.id} />
                       <input type="hidden" name="completed" value={String(m.completed)} />
-                      <button className="text-ink-400 hover:text-green-600" title="Toggle complete">
+                      <button className="text-ink-500 hover:text-green-600" title="Toggle complete">
                         {m.completed ? (
                           <CheckCircle2 className="h-5 w-5 text-green-600" />
                         ) : (
@@ -101,14 +101,14 @@ export default async function PoamDetail({
                   ) : m.completed ? (
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
                   ) : (
-                    <Circle className="h-5 w-5 text-ink-400" />
+                    <Circle className="h-5 w-5 text-ink-500" />
                   )}
                   <div className="flex-1">
-                    <div className={m.completed ? "text-sm text-ink-400 line-through" : "text-sm text-ink-800"}>
+                    <div className={m.completed ? "text-sm text-ink-500 line-through" : "text-sm text-ink-800"}>
                       {m.description}
                     </div>
                     {m.dueDate && (
-                      <div className="text-[11px] text-ink-400">Due {fmtDate(m.dueDate)}</div>
+                      <div className="text-[11px] text-ink-500">Due {fmtDate(m.dueDate)}</div>
                     )}
                   </div>
                 </li>
@@ -126,7 +126,7 @@ export default async function PoamDetail({
                 <li key={f.id} className="flex items-center justify-between py-2">
                   <Link href={`/findings/${f.id}`} className="text-sm text-ink-800 hover:underline">
                     {f.title}
-                    <span className="ml-2 text-xs text-ink-400">{f.asset?.hostname}</span>
+                    <span className="ml-2 text-xs text-ink-500">{f.asset?.hostname}</span>
                   </Link>
                   <SeverityBadge value={f.severity} />
                 </li>
@@ -300,7 +300,7 @@ export default async function PoamDetail({
                   {c.controlId}
                 </Link>
               ))}
-              {poam.controls.length === 0 && <span className="text-xs text-ink-400">—</span>}
+              {poam.controls.length === 0 && <span className="text-xs text-ink-500">—</span>}
             </div>
           </div>
         </div>

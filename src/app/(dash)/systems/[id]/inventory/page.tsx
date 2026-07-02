@@ -85,8 +85,8 @@ export default async function InventoryPage({
           <tbody className="divide-y divide-ink-100">
             {system.assets.map((a) => (
               <tr key={a.id}>
-                <td className="td font-medium">{a.hostname}<div className="text-[11px] text-ink-400">{a.osName}</div></td>
-                <td className="td text-xs">{a.ipAddress ?? "—"}<div className="text-ink-400">{a.macAddress}</div></td>
+                <td className="td font-medium">{a.hostname}<div className="text-[11px] text-ink-500">{a.osName}</div></td>
+                <td className="td text-xs">{a.ipAddress ?? "—"}<div className="text-ink-500">{a.macAddress}</div></td>
                 <td className="td text-xs">{[a.manufacturer, a.model].filter(Boolean).join(" / ") || "—"}</td>
                 <td className="td text-xs">{a.serialNumber ?? "—"}</td>
                 <td className="td text-xs">{a.location ?? "—"}</td>
@@ -124,7 +124,7 @@ export default async function InventoryPage({
                       <form action={deleteSoftwareAction}>
                         <input type="hidden" name="id" value={s.id} />
                         <input type="hidden" name="systemId" value={system.id} />
-                        <button className="text-ink-400 hover:text-red-600" title="Remove">
+                        <button className="text-ink-500 hover:text-red-600" title="Remove">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </form>
@@ -189,7 +189,7 @@ export default async function InventoryPage({
                     <form action={deletePpsmAction}>
                       <input type="hidden" name="id" value={p.id} />
                       <input type="hidden" name="systemId" value={system.id} />
-                      <button className="text-ink-400 hover:text-red-600" title="Remove">
+                      <button className="text-ink-500 hover:text-red-600" title="Remove">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </form>

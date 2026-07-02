@@ -164,7 +164,7 @@ function Kpi({
 function DeltaBadge({ delta }: { delta: number }) {
   if (delta === 0)
     return (
-      <span className="inline-flex items-center gap-0.5 text-xs text-ink-400">
+      <span className="inline-flex items-center gap-0.5 text-xs text-ink-500">
         <Minus className="h-3 w-3" /> 0
       </span>
     );

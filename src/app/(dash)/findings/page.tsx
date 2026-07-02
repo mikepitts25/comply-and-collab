@@ -112,14 +112,14 @@ export default async function FindingsPage({
             {findings.map((f) => (
               <tr key={f.id} className="hover:bg-ink-50">
                 {canUpdate && (
-                  <td className="td"><input type="checkbox" name="findingIds" value={f.id} className="h-4 w-4" /></td>
+                  <td className="td"><input type="checkbox" name="findingIds" value={f.id} className="h-4 w-4" aria-label={`Select ${f.title}`} /></td>
                 )}
                 <td className="td"><SeverityBadge value={f.severity} /></td>
                 <td className="td max-w-md">
                   <Link href={`/findings/${f.id}`} className="font-medium text-ink-900 hover:underline">
                     {f.title}
                   </Link>
-                  <div className="font-mono text-[11px] text-ink-400">
+                  <div className="font-mono text-[11px] text-ink-500">
                     {f.stigId ?? f.pluginId ?? f.ruleId}
                     {f.cve ? ` · ${f.cve}` : ""}
                   </div>
@@ -134,7 +134,7 @@ export default async function FindingsPage({
                         {c.controlId}
                       </span>
                     ))}
-                    {f.controls.length === 0 && <span className="text-xs text-ink-400">—</span>}
+                    {f.controls.length === 0 && <span className="text-xs text-ink-500">—</span>}
                   </div>
                 </td>
                 <td className="td"><FindingStatusBadge value={f.status} /></td>
@@ -172,7 +172,7 @@ function FilterGroup({
 }) {
   return (
     <div className="flex items-center gap-1">
-      <span className="px-1 text-xs font-semibold uppercase text-ink-400">{label}:</span>
+      <span className="px-1 text-xs font-semibold uppercase text-ink-500">{label}:</span>
       {options.map((o) => {
         const active = current === o;
         const value = o === "ALL" ? undefined : o;
